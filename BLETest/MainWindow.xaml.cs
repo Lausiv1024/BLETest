@@ -1,0 +1,75 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using Windows.Devices.Bluetooth.GenericAttributeProfile;
+using Windows.Media.Capture;
+using BLETest.Settings;
+
+namespace BLETest
+{
+    /// <summary>
+    /// MainWindow.xaml の相互作用ロジック
+    /// </summary>
+    public partial class MainWindow : Window
+    {
+        public byte cnt = 0;
+        public const int BufferSize = 1024;
+        BLECommunication bleCommunication;
+        public MainWindow()
+        {
+            InitializeComponent();
+        }
+
+        public async Task BLEMain()
+        {
+            bleCommunication = new BLECommunication(BLESettings.ServiceId, BLESettings.BleCommunicationCCharacteristic, "BLETest");
+            bleCommunication.OnDataReceived += (sender, e) =>
+            {
+                string str = Encoding.UTF8.GetString(e.Data);
+                Dispatcher.Invoke(() => ReceivedVal.Text += $"[{e.DeviceId}] : {str}\n");
+            };
+            await bleCommunication.BLEInitializeAsync();
+        }
+
+        private async void Window_Initialized(object sender, EventArgs e)
+        {
+            await BLEMain();
+        }
+
+        private async Task notify(string str)
+        {
+            byte[] buf = Encoding.UTF8.GetBytes(str);
+            await bleCommunication.NotifyAsync(buf);
+        }
+
+        private async void NotifyBut_Click(object sender, RoutedEventArgs e)
+        {
+            if (SendVal.Text != "")
+            {
+                await notify(SendVal.Text);
+                SendVal.Text = "";
+            }
+        }
+
+        private async void SendVal_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (SendVal.Text != "" && e.Key == Key.Enter)
+            {
+                await notify(SendVal.Text);
+                SendVal.Text = "";
+            }
+        }
+    }
+}
