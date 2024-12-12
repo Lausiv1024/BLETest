@@ -37,6 +37,16 @@ namespace BLETest
             bleCommunication = new BLECommunication(BLESettings.ServiceId, BLESettings.BleCommunicationCCharacteristic, "BLETest");
             bleCommunication.OnDataReceived += (sender, e) =>
             {
+                if (e.Data.Length >= 2 && e.Data[0] == 0xFF){
+                    if (e.Data[1] == 0x80)
+                    {
+                        Dispatcher.Invoke(() => NotifyBut.Content = "1");
+                    } else if (e.Data[1] == 0x81)
+                    {
+                        Dispatcher.Invoke(() => NotifyBut.Content = "0");
+                    }
+                    return;
+                }
                 string str = Encoding.UTF8.GetString(e.Data);
                 Dispatcher.Invoke(() => ReceivedVal.Text += $"[{e.DeviceId}] : {str}\n");
             };

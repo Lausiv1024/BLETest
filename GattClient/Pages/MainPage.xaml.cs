@@ -14,6 +14,14 @@ namespace GattClient
         public MainPage()
         {
             InitializeComponent();
+            RealtimeStateSend.Pressed += async (s, e) =>
+            {
+                await manager.SendDataAsync([0xFF, 0x80]);
+            };
+            RealtimeStateSend.Released += async (s, e) =>
+            {
+                await manager.SendDataAsync([0xFF, 0x81]);
+            };
         }
 
         private async void OnCounterClicked(object sender, EventArgs e)
@@ -33,8 +41,9 @@ namespace GattClient
                 if (SendValue.Text == string.Empty)
                     return;
                 var data = Encoding.UTF8.GetBytes(SendValue.Text);
-                await manager.SendDataAsync(data);
-                SendValue.Text = string.Empty;
+                long time = await manager.SendDataAsync(data);
+                ReceivedValue.Text += $"Sending time {time}ticks\n";
+                //SendValue.Text = string.Empty;
             } else
                 await manager.ConfigureCharacteristic(BLESettings.ServiceId, BLESettings.BleCommunicationCCharacteristic);
 
@@ -64,7 +73,10 @@ namespace GattClient
             manager = new BleCommunicationClientManager(CrossBluetoothLE.Current, CrossBluetoothLE.Current.Adapter);
             manager.OnReceive += Manager_OnReceive;
             await manager.ConfigureCharacteristic(BLESettings.ServiceId, BLESettings.BleCommunicationCCharacteristic);
-            ReceivedValue.Text += "Setup done\n";
+            if (manager.IsConnected)
+                ReceivedValue.Text += "Setup done\n";
+            else
+                ReceivedValue.Text += "Setup failed\n";
             Console.WriteLine(manager.IsConnected);
             isBleSetupDone = true;
         }

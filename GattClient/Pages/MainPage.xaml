@@ -7,6 +7,7 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="auto" />
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <ScrollView>
             <VerticalStackLayout
@@ -27,5 +28,7 @@
             SemanticProperties.Hint="Counts the number of times you click"
             Clicked="OnCounterClicked"
             HorizontalOptions="Fill" />
+        <Button Text="RealtimeStateSend" Padding="30" Margin="20"
+                x:Name="RealtimeStateSend" Grid.Row="3"/>
     </Grid>
 </ContentPage>

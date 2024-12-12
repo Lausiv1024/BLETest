@@ -16,6 +16,7 @@ namespace GattClient
         readonly IAdapter adapter;
         readonly List<IDevice> devices;
         IDevice? ConnectedDevice;
+        ICharacteristic? CurrentCharacteristic;
         public bool IsConfiguring { get; private set; }
         public bool IsConnected => ConnectedDevice != null;
         public delegate void DeviceDisconnectedEventHandler(object sender, EventArgs e);
@@ -28,33 +29,39 @@ namespace GattClient
             devices = new List<IDevice>();
             this.ble = ble;
             this.adapter = adapter;
-            this.adapter.DeviceDiscovered += (s, e) =>
+            this.adapter.DeviceDiscovered += (s, e) => //デバイスの検出
             {
                 Console.WriteLine($"Device Discovered: {e.Device.Name}");
                 devices.Add(e.Device);
             };
-            this.adapter.DeviceDisconnected += (s, e) =>
+            this.adapter.DeviceDisconnected += (s, e) => //デバイスの切断
             {
                 Console.WriteLine("Device Disconnected");
                 ConnectedDevice = null;
+                CurrentCharacteristic = null;
                 DeviceDisconnected?.Invoke(this, new EventArgs());
+            };
+            ble.StateChanged += (s, e) =>
+            {
+                Console.WriteLine($"BLE State Changed: {e.NewState}");
             };
         }
 
 
-        public async Task SendDataAsync(byte[] data)
+        public async Task<long> SendDataAsync(byte[] data)
         {
-            if (ConnectedDevice == null)
+            if (ConnectedDevice == null || CurrentCharacteristic == null)
             {
                 Console.WriteLine("Device is not connected");
-                return;
+                return 0;
             }
-            var service = await ConnectedDevice.GetServiceAsync(BLESettings.ServiceId);
-            var characteristic = await service.GetCharacteristicAsync(BLESettings.BleCommunicationCCharacteristic);
+            if (IsConfiguring)
+                return 0;
             long s = DateTime.Now.Ticks;
-            await characteristic.WriteAsync(data);
+            await CurrentCharacteristic.WriteAsync(data);
             long e = DateTime.Now.Ticks;
             Console.WriteLine($"Write time: {e - s} ticks");
+            return e - s;
         }
         private async Task DisconnectDevice()
         {
@@ -80,6 +87,7 @@ namespace GattClient
                 OnReceive?.Invoke(this, new ReceivedNotificationEventArgs(e.Characteristic.Value));
             };
             await c.StartUpdatesAsync();
+            CurrentCharacteristic = c;
             IsConfiguring = false;
             Task.Run(KeepAlive);
         }
@@ -132,12 +140,10 @@ namespace GattClient
 
         private async void KeepAlive()
         {
-            while (ConnectedDevice != null)
+            while (ConnectedDevice != null && CurrentCharacteristic != null)
             {
                 await Task.Delay(1000);
-                var service = await ConnectedDevice.GetServiceAsync(BLESettings.ServiceId);
-                var characteristic = await service.GetCharacteristicAsync(BLESettings.BleCommunicationCCharacteristic);
-                await characteristic.ReadAsync();
+                await CurrentCharacteristic.ReadAsync();
             }
         }
     }
