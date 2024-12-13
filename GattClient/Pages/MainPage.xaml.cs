@@ -74,7 +74,7 @@ namespace GattClient
             manager.OnReceive += Manager_OnReceive;
             await manager.ConfigureCharacteristic(BLESettings.ServiceId, BLESettings.BleCommunicationCCharacteristic);
             if (manager.IsConnected)
-                ReceivedValue.Text += "Setup done\n";
+                ReceivedValue.Text += $"Setup done\n";
             else
                 ReceivedValue.Text += "Setup failed\n";
             Console.WriteLine(manager.IsConnected);

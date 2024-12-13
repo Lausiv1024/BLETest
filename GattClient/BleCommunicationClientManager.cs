@@ -45,6 +45,7 @@ namespace GattClient
             {
                 Console.WriteLine($"BLE State Changed: {e.NewState}");
             };
+            
         }
 
 
@@ -70,6 +71,13 @@ namespace GattClient
                 await adapter.DisconnectDeviceAsync(ConnectedDevice);
             }
         }
+
+        /// <summary>
+        /// 通信用キャラクタリスティックの設定
+        /// </summary>
+        /// <param name="ServiceId">サービスID</param>
+        /// <param name="CharacteristicId">キャラクタ理スティックのID</param>
+        /// <returns></returns>
         public async Task ConfigureCharacteristic(Guid ServiceId, Guid CharacteristicId)
         {
             IsConfiguring = true;
@@ -91,7 +99,6 @@ namespace GattClient
             IsConfiguring = false;
             Task.Run(KeepAlive);
         }
-
 
         /// <summary>
         /// ServiceIdからデバイスを検索する
@@ -132,6 +139,8 @@ namespace GattClient
                     continue;
                 }
                 ConnectedDevice = device;
+                Console.WriteLine($"Connected Device id : {ConnectedDevice.Id}");
+                
                 service = s;
                 break;
             }
