@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 namespace BLETest
 {
-    public class BLECommunication
+    public class BLECommunicationServer
     {
         public const int BufferSize = 1024;
 
@@ -20,7 +20,7 @@ namespace BLETest
         /// <summary>
         /// 1つのGattCharastricを用いて、BLE通信を行う
         /// </summary>
-        public BLECommunication(Guid ServiceId, Guid ParamId, string paramName)
+        public BLECommunicationServer(Guid ServiceId, Guid ParamId, string paramName)
         {
             this.ServiceId = ServiceId;
             this.ParamId = ParamId;
@@ -31,7 +31,7 @@ namespace BLETest
             var gattSvcProviderRes = await GattServiceProvider.CreateAsync(ServiceId);
             if (gattSvcProviderRes.Error != Windows.Devices .Bluetooth.BluetoothError.Success)
             {
-                Console.WriteLine("Failed to create GattServiceProvider::" + gattSvcProviderRes.Error.ToString());
+                Console.WriteLine("Failed to create GattServiceProvider::" + gattSvcProviderRes.Error);
                 return;
             }
             var gattSvcProvider = gattSvcProviderRes.ServiceProvider;
@@ -59,7 +59,7 @@ namespace BLETest
                 var buf = request.Value.ToArray();
                 if (request.Option == GattWriteOption.WriteWithResponse)
                 {
-                    request.Respond();
+                    //request.Respond();
                 }
                 deferral.Complete();
                 OnDataReceived?.Invoke(this, new OnDataReceivedEventArgs(buf, args.Session.DeviceId.Id));

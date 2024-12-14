@@ -69,4 +69,10 @@
 	  <ProjectReference Include="..\BLETest.Settings\BLETest.Settings.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <MauiXaml Update="Pages\TenKey.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	</ItemGroup>
+
 </Project>

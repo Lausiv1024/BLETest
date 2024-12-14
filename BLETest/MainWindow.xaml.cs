@@ -26,7 +26,7 @@ namespace BLETest
     {
         public byte cnt = 0;
         public const int BufferSize = 1024;
-        BLECommunication bleCommunication;
+        BLECommunicationServer _bleCommunicationServer;
         public MainWindow()
         {
             InitializeComponent();
@@ -34,8 +34,8 @@ namespace BLETest
 
         public async Task BLEMain()
         {
-            bleCommunication = new BLECommunication(BLESettings.ServiceId, BLESettings.BleCommunicationCCharacteristic, "BLETest");
-            bleCommunication.OnDataReceived += (sender, e) =>
+            _bleCommunicationServer = new BLECommunicationServer(BLESettings.ServiceId, BLESettings.BleCommunicationCCharacteristic, "BLETest");
+            _bleCommunicationServer.OnDataReceived += (sender, e) =>
             {
                 if (e.Data.Length >= 2 && e.Data[0] == 0xFF){
                     if (e.Data[1] == 0x80)
@@ -50,18 +50,19 @@ namespace BLETest
                 string str = Encoding.UTF8.GetString(e.Data);
                 Dispatcher.Invoke(() => ReceivedVal.Text += $"[{e.DeviceId}] : {str}\n");
             };
-            await bleCommunication.BLEInitializeAsync();
+            await _bleCommunicationServer.BLEInitializeAsync();
         }
 
         private async void Window_Initialized(object sender, EventArgs e)
         {
             await BLEMain();
         }
-
+        private int counter = 0;
         private async Task notify(string str)
         {
-            byte[] buf = Encoding.UTF8.GetBytes(str);
-            await bleCommunication.NotifyAsync(buf);
+            byte[] buf = Encoding.UTF8.GetBytes(str + counter);
+            await _bleCommunicationServer.NotifyAsync(buf);
+            counter++;
         }
 
         private async void NotifyBut_Click(object sender, RoutedEventArgs e)
@@ -69,7 +70,7 @@ namespace BLETest
             if (SendVal.Text != "")
             {
                 await notify(SendVal.Text);
-                SendVal.Text = "";
+                //SendVal.Text = "";
             }
         }
 
@@ -78,7 +79,7 @@ namespace BLETest
             if (SendVal.Text != "" && e.Key == Key.Enter)
             {
                 await notify(SendVal.Text);
-                SendVal.Text = "";
+                
             }
         }
     }

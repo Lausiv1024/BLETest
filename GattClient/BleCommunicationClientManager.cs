@@ -23,10 +23,12 @@ namespace GattClient
         public event DeviceDisconnectedEventHandler? DeviceDisconnected;
         public delegate void ReceiveNotificationEventHandler(object sender, ReceivedNotificationEventArgs e);
         public event ReceiveNotificationEventHandler? OnReceive;
+        private Queue<byte[]> sendingBytesQueue;
 
         public BleCommunicationClientManager(IBluetoothLE ble, IAdapter adapter)
         {
             devices = new List<IDevice>();
+            sendingBytesQueue = new Queue<byte[]>();
             this.ble = ble;
             this.adapter = adapter;
             this.adapter.DeviceDiscovered += (s, e) => //デバイスの検出
@@ -39,30 +41,47 @@ namespace GattClient
                 Console.WriteLine("Device Disconnected");
                 ConnectedDevice = null;
                 CurrentCharacteristic = null;
-                DeviceDisconnected?.Invoke(this, new EventArgs());
+                DeviceDisconnected?.Invoke(this, EventArgs.Empty);
             };
             ble.StateChanged += (s, e) =>
             {
                 Console.WriteLine($"BLE State Changed: {e.NewState}");
             };
-            
+            Task.Run(ManagerMainLoop);
         }
 
+        public delegate void DataSentEventHandler(object sender, DataSentEventArgs e);
+        public event DataSentEventHandler? OnDataSent;
+        private async Task ManagerMainLoop()
+        {
+            int c = 0;
+            while (true)
+            {
+                if (IsConnected && CurrentCharacteristic != null)
+                {
+                    if (sendingBytesQueue.Count > 0)
+                    {
+                        var data = sendingBytesQueue.Dequeue();
+                        long s = DateTime.Now.Ticks;
+                        await CurrentCharacteristic.WriteAsync(data);
+                        long e = DateTime.Now.Ticks;
+                        Console.WriteLine($"Sending time: {e - s}ticks");
+                        OnDataSent?.Invoke(this, new DataSentEventArgs(e - s));
+                    }
+                    else if (c % 1000 == 0)
+                    {
+                        await CurrentCharacteristic.ReadAsync();
+                    }else
+                        await Task.Delay(1);
+                }else await Task.Delay(1);
+                c++;
+            }
+        }
 
         public async Task<long> SendDataAsync(byte[] data)
         {
-            if (ConnectedDevice == null || CurrentCharacteristic == null)
-            {
-                Console.WriteLine("Device is not connected");
-                return 0;
-            }
-            if (IsConfiguring)
-                return 0;
-            long s = DateTime.Now.Ticks;
-            await CurrentCharacteristic.WriteAsync(data);
-            long e = DateTime.Now.Ticks;
-            Console.WriteLine($"Write time: {e - s} ticks");
-            return e - s;
+            sendingBytesQueue.Enqueue(data);
+            return 0;
         }
         private async Task DisconnectDevice()
         {
@@ -97,7 +116,6 @@ namespace GattClient
             await c.StartUpdatesAsync();
             CurrentCharacteristic = c;
             IsConfiguring = false;
-            Task.Run(KeepAlive);
         }
 
         /// <summary>
@@ -146,15 +164,6 @@ namespace GattClient
             }
             return service;
         }
-
-        private async void KeepAlive()
-        {
-            while (ConnectedDevice != null && CurrentCharacteristic != null)
-            {
-                await Task.Delay(1000);
-                await CurrentCharacteristic.ReadAsync();
-            }
-        }
     }
     public class ReceivedNotificationEventArgs : EventArgs
     {
@@ -162,6 +171,15 @@ namespace GattClient
         public ReceivedNotificationEventArgs(byte[] data)
         {
             Data = data;
+        }
+    }
+
+    public class DataSentEventArgs : EventArgs
+    {
+        public long SentTime { get; }
+        public DataSentEventArgs(long sentTime)
+        {
+            SentTime = sentTime;
         }
     }
 }

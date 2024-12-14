@@ -70,15 +70,27 @@ namespace GattClient
                     return;
                 }
             }
-            manager = new BleCommunicationClientManager(CrossBluetoothLE.Current, CrossBluetoothLE.Current.Adapter);
-            manager.OnReceive += Manager_OnReceive;
-            await manager.ConfigureCharacteristic(BLESettings.ServiceId, BLESettings.BleCommunicationCCharacteristic);
+
+            if (manager == null)
+            {
+                //初回起動時のみインスタンスを生成・初期化
+                manager = new BleCommunicationClientManager(CrossBluetoothLE.Current, CrossBluetoothLE.Current.Adapter);
+                manager.OnReceive += Manager_OnReceive;
+                manager.OnDataSent += Manager_OnDataSent;
+            }
+            if (!manager.IsConnected)
+                await manager.ConfigureCharacteristic(BLESettings.ServiceId, BLESettings.BleCommunicationCCharacteristic);
             if (manager.IsConnected)
                 ReceivedValue.Text += $"Setup done\n";
             else
                 ReceivedValue.Text += "Setup failed\n";
             Console.WriteLine(manager.IsConnected);
             isBleSetupDone = true;
+        }
+
+        private void Manager_OnDataSent(object sender, DataSentEventArgs e)
+        {
+            Dispatcher.Dispatch(() => ReceivedValue.Text += $"Sending Spent Ticks : {e.SentTime}");
         }
 
         private void Manager_OnReceive(object sender, ReceivedNotificationEventArgs e)
