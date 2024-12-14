@@ -17,13 +17,16 @@ namespace GattClient
         readonly List<IDevice> devices;
         IDevice? ConnectedDevice;
         ICharacteristic? CurrentCharacteristic;
+        private Queue<byte[]> sendingBytesQueue;
+        private Guid? ConnectedDeviceId;
+
         public bool IsConfiguring { get; private set; }
         public bool IsConnected => ConnectedDevice != null;
+
         public delegate void DeviceDisconnectedEventHandler(object sender, EventArgs e);
         public event DeviceDisconnectedEventHandler? DeviceDisconnected;
         public delegate void ReceiveNotificationEventHandler(object sender, ReceivedNotificationEventArgs e);
         public event ReceiveNotificationEventHandler? OnReceive;
-        private Queue<byte[]> sendingBytesQueue;
 
         public BleCommunicationClientManager(IBluetoothLE ble, IAdapter adapter)
         {
@@ -62,18 +65,21 @@ namespace GattClient
                     if (sendingBytesQueue.Count > 0)
                     {
                         var data = sendingBytesQueue.Dequeue();
+
                         long s = DateTime.Now.Ticks;
-                        await CurrentCharacteristic.WriteAsync(data);
+                        await CurrentCharacteristic.WriteAsync(data);//なぜかここで100万Tick以上の処理時間が生じる
                         long e = DateTime.Now.Ticks;
+
                         Console.WriteLine($"Sending time: {e - s}ticks");
                         OnDataSent?.Invoke(this, new DataSentEventArgs(e - s));
                     }
                     else if (c % 1000 == 0)
                     {
-                        await CurrentCharacteristic.ReadAsync();
-                    }else
-                        await Task.Delay(1);
-                }else await Task.Delay(1);
+                        //await CurrentCharacteristic.ReadAsync();
+                    }
+                }
+
+                await Task.Delay(1);
                 c++;
             }
         }
@@ -108,7 +114,7 @@ namespace GattClient
                 return;
             }
             Console.WriteLine("Found service Id: {0}", foundService.Id);
-            var c = await foundService.GetCharacteristicAsync(BLESettings.BleCommunicationCCharacteristic);
+            var c = await foundService.GetCharacteristicAsync(CharacteristicId);
             c.ValueUpdated += (s, e) =>
             {
                 OnReceive?.Invoke(this, new ReceivedNotificationEventArgs(e.Characteristic.Value));
@@ -131,7 +137,7 @@ namespace GattClient
             {
                 ServiceUuids = [serviceId]
             };
-            await adapter.StartScanningForDevicesAsync(scanOption);
+            await adapter.StartScanningForDevicesAsync();
             Console.WriteLine("Finding Devices finished");
         }
 

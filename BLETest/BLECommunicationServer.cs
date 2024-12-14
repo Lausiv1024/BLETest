@@ -55,11 +55,14 @@ namespace BLETest
             localCharasteristic.WriteRequested += async (sender, args) =>
             {
                 var deferral = args.GetDeferral();
+                long s = DateTime.Now.Ticks;
                 var request = await args.GetRequestAsync();
+                long e = DateTime.Now.Ticks;
+                Console.WriteLine("GetRequest Time : {0}", e - s);
                 var buf = request.Value.ToArray();
                 if (request.Option == GattWriteOption.WriteWithResponse)
                 {
-                    //request.Respond();
+                    request.Respond();
                 }
                 deferral.Complete();
                 OnDataReceived?.Invoke(this, new OnDataReceivedEventArgs(buf, args.Session.DeviceId.Id));

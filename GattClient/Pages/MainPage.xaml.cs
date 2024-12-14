@@ -45,7 +45,7 @@ namespace GattClient
                 ReceivedValue.Text += $"Sending time {time}ticks\n";
                 //SendValue.Text = string.Empty;
             } else
-                await manager.ConfigureCharacteristic(BLESettings.ServiceId, BLESettings.BleCommunicationCCharacteristic);
+                await manager.ConfigureCharacteristic(BLESettings.ServiceIdEsp, BLESettings.BleCommunicationCCharacteristicEsp);
 
         }
         private async void ContentPage_Loaded(object sender, EventArgs e)
@@ -79,7 +79,7 @@ namespace GattClient
                 manager.OnDataSent += Manager_OnDataSent;
             }
             if (!manager.IsConnected)
-                await manager.ConfigureCharacteristic(BLESettings.ServiceId, BLESettings.BleCommunicationCCharacteristic);
+                await manager.ConfigureCharacteristic(BLESettings.ServiceIdEsp, BLESettings.BleCommunicationCCharacteristicEsp);
             if (manager.IsConnected)
                 ReceivedValue.Text += $"Setup done\n";
             else
