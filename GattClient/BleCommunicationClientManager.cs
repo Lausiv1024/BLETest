@@ -67,7 +67,7 @@ namespace GattClient
                         var data = sendingBytesQueue.Dequeue();
 
                         long s = DateTime.Now.Ticks;
-                        await CurrentCharacteristic.WriteAsync(data);//なぜかここで100万Tick以上の処理時間が生じる
+                        await CurrentCharacteristic.WriteAsync(data);//なぜかここで50~100ms程度の処理時間が生じる
                         long e = DateTime.Now.Ticks;
 
                         Console.WriteLine($"Sending time: {Util.ToMilliseconds(e - s)}ms");

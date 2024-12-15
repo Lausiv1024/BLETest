@@ -13,7 +13,7 @@ namespace BLETest.Settings
         /// <returns></returns>
         public static int ToMilliseconds(long ticks)
         {
-            return (int)ticks / 10000;
+            return (int)TimeSpan.FromTicks(ticks).TotalMilliseconds;
         }
     }
 }
