@@ -70,7 +70,7 @@ namespace GattClient
                         await CurrentCharacteristic.WriteAsync(data);//なぜかここで100万Tick以上の処理時間が生じる
                         long e = DateTime.Now.Ticks;
 
-                        Console.WriteLine($"Sending time: {e - s}ticks");
+                        Console.WriteLine($"Sending time: {Util.ToMilliseconds(e - s)}ms");
                         OnDataSent?.Invoke(this, new DataSentEventArgs(e - s));
                     }
                     else if (c % 1000 == 0)
@@ -97,16 +97,18 @@ namespace GattClient
             }
         }
 
+        public async Task ConfigureCharacteristic(Guid serviceId, Guid characteristicId)
+            => await ConfigureCharacteristic(serviceId, characteristicId, true);
         /// <summary>
         /// 通信用キャラクタリスティックの設定
         /// </summary>
         /// <param name="ServiceId">サービスID</param>
         /// <param name="CharacteristicId">キャラクタ理スティックのID</param>
         /// <returns></returns>
-        public async Task ConfigureCharacteristic(Guid ServiceId, Guid CharacteristicId)
+        public async Task ConfigureCharacteristic(Guid ServiceId, Guid CharacteristicId, bool isEnableFilteredDiscover)
         {
             IsConfiguring = true;
-            var foundService = await ConnectToService(ServiceId);
+            var foundService = await ConnectToService(ServiceId, isEnableFilteredDiscover);
             if (foundService == null)
             {
                 await DisconnectDevice();
@@ -129,7 +131,7 @@ namespace GattClient
         /// </summary>
         /// <param name="serviceId"></param>
         /// <returns></returns>
-        private async Task FindDeviceFromServiceIdAsync(Guid serviceId)
+        private async Task FindDeviceFromServiceIdAsync(Guid serviceId, bool usesScanOption)
         {
             devices.Clear();
             Console.WriteLine("Finding Device...");
@@ -137,13 +139,19 @@ namespace GattClient
             {
                 ServiceUuids = [serviceId]
             };
-            await adapter.StartScanningForDevicesAsync();
+            if (usesScanOption)
+            {
+                await adapter.StartScanningForDevicesAsync(scanOption);
+            } else
+            {
+                await adapter.StartScanningForDevicesAsync();
+            }
             Console.WriteLine("Finding Devices finished");
         }
 
-        private async Task<IService?> ConnectToService(Guid ServiceId)
+        private async Task<IService?> ConnectToService(Guid ServiceId, bool usesScanOption)
         {
-            await FindDeviceFromServiceIdAsync(ServiceId);//該当するサービスを持つデバイスをスキャンする。
+            await FindDeviceFromServiceIdAsync(ServiceId, usesScanOption);//該当するサービスを持つデバイスをスキャンする。
             if (devices.Count == 0) 
             {
                 Console.WriteLine("No devices found");

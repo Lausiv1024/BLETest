@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BLETest.Settings;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -47,7 +48,10 @@ namespace BLETest
             localCharasteristic.ReadRequested += async (sender, args) =>
             {
                 var deferral = args.GetDeferral();
+                long s = DateTime.Now.Ticks;
                 var request = await args.GetRequestAsync();
+                long e = DateTime.Now.Ticks;
+                Console.WriteLine("GetRequest Time : {0}",Util.ToMilliseconds(e - s));
                 byte[] buf = new byte[] { 0x20};
                 request.RespondWithValue(buf.AsBuffer());
                 deferral.Complete();

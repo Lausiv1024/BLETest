@@ -41,11 +41,10 @@ namespace GattClient
                 if (SendValue.Text == string.Empty)
                     return;
                 var data = Encoding.UTF8.GetBytes(SendValue.Text);
-                long time = await manager.SendDataAsync(data);
-                ReceivedValue.Text += $"Sending time {time}ticks\n";
+                await manager.SendDataAsync(data);
                 //SendValue.Text = string.Empty;
             } else
-                await manager.ConfigureCharacteristic(BLESettings.ServiceIdEsp, BLESettings.BleCommunicationCCharacteristicEsp);
+                await manager.ConfigureCharacteristic(BLESettings.ServiceId, BLESettings.BleCommunicationCCharacteristic);
 
         }
         private async void ContentPage_Loaded(object sender, EventArgs e)
@@ -79,7 +78,7 @@ namespace GattClient
                 manager.OnDataSent += Manager_OnDataSent;
             }
             if (!manager.IsConnected)
-                await manager.ConfigureCharacteristic(BLESettings.ServiceIdEsp, BLESettings.BleCommunicationCCharacteristicEsp);
+                await manager.ConfigureCharacteristic(BLESettings.ServiceId, BLESettings.BleCommunicationCCharacteristic);
             if (manager.IsConnected)
                 ReceivedValue.Text += $"Setup done\n";
             else
@@ -90,7 +89,7 @@ namespace GattClient
 
         private void Manager_OnDataSent(object sender, DataSentEventArgs e)
         {
-            Dispatcher.Dispatch(() => ReceivedValue.Text += $"Sending Spent Ticks : {e.SentTime}");
+            Dispatcher.Dispatch(() => ReceivedValue.Text += $"Sending Spent Ticks : {Util.ToMilliseconds(e.SentTime)}\n");
         }
 
         private void Manager_OnReceive(object sender, ReceivedNotificationEventArgs e)
