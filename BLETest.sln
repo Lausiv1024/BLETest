@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GattClient", "GattClient\Ga
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLETest.Settings", "BLETest.Settings\BLETest.Settings.csproj", "{95080D09-C096-4114-8900-D4409B73EA1F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GattClientNative", "GattClientNative\GattClientNative.csproj", "{9BBB8A4E-7747-4DBA-AA3D-F9B9B2ECE806}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GattServerNative", "GattClientNative\GattServerNative.csproj", "{9BBB8A4E-7747-4DBA-AA3D-F9B9B2ECE806}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
