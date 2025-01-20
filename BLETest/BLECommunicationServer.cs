@@ -30,7 +30,7 @@ namespace BLETest
         public async Task BLEInitializeAsync()
         {
             var gattSvcProviderRes = await GattServiceProvider.CreateAsync(ServiceId);
-            if (gattSvcProviderRes.Error != Windows.Devices .Bluetooth.BluetoothError.Success)
+            if (gattSvcProviderRes.Error != Windows.Devices.Bluetooth.BluetoothError.Success)
             {
                 Console.WriteLine("Failed to create GattServiceProvider::" + gattSvcProviderRes.Error);
                 return;
