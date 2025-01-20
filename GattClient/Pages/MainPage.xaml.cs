@@ -49,6 +49,7 @@ namespace GattClient
         }
         private async void ContentPage_Loaded(object sender, EventArgs e)
         {
+            //位置情報とBluetoothのパーミッションを確認
             var locPermissionStatus = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
             if (locPermissionStatus != PermissionStatus.Granted)
             {
@@ -73,6 +74,7 @@ namespace GattClient
             if (manager == null)
             {
                 //初回起動時のみインスタンスを生成・初期化
+                //おそらくLoadedは一度しか呼ばれないが、念のためnullチェック
                 manager = new BleCommunicationClientManager(CrossBluetoothLE.Current, CrossBluetoothLE.Current.Adapter);
                 manager.OnReceive += Manager_OnReceive;
                 manager.OnDataSent += Manager_OnDataSent;

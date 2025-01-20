@@ -23,6 +23,7 @@
 
         private async void ContentPage_Loaded(object sender, EventArgs e)
         {
+            // Check for required permissions
             var locPermissionStatus = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
             if (locPermissionStatus != PermissionStatus.Granted)
             {
