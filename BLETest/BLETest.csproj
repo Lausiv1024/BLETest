@@ -101,12 +101,19 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BLEMessage\BLEMessage.csproj">
+      <Project>{3ae1c8bd-acb4-440c-976a-52f3debb55f0}</Project>
+      <Name>BLEMessage</Name>
+    </ProjectReference>
     <ProjectReference Include="..\BLETest.Settings\BLETest.Settings.csproj">
       <Project>{95080d09-c096-4114-8900-d4409b73ea1f}</Project>
       <Name>BLETest.Settings</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="MessagePack">
+      <Version>3.1.3</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.Windows.SDK.Contracts">
       <Version>10.0.26100.1742</Version>
     </PackageReference>

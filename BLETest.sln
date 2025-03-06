@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLETest.Settings", "BLETest
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GattServerNative", "GattClientNative\GattServerNative.csproj", "{9BBB8A4E-7747-4DBA-AA3D-F9B9B2ECE806}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLEMessage", "BLEMessage\BLEMessage.csproj", "{3AE1C8BD-ACB4-440C-976A-52F3DEBB55F0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,8 +36,15 @@ Global
 		{9BBB8A4E-7747-4DBA-AA3D-F9B9B2ECE806}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9BBB8A4E-7747-4DBA-AA3D-F9B9B2ECE806}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9BBB8A4E-7747-4DBA-AA3D-F9B9B2ECE806}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3AE1C8BD-ACB4-440C-976A-52F3DEBB55F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AE1C8BD-ACB4-440C-976A-52F3DEBB55F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AE1C8BD-ACB4-440C-976A-52F3DEBB55F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AE1C8BD-ACB4-440C-976A-52F3DEBB55F0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {39D85D0A-7082-4D48-9BA9-BEE877B86FC4}
 	EndGlobalSection
 EndGlobal
