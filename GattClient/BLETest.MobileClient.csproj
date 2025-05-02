@@ -67,8 +67,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\BLEMessage\BLEMessage.csproj" />
-	  <ProjectReference Include="..\BLETest.Settings\BLETest.Settings.csproj" />
+	  <ProjectReference Include="..\BLETest.Settings\BLETest.Common.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
