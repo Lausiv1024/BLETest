@@ -19,38 +19,52 @@ namespace GattClient
         ICharacteristic? CurrentCharacteristic;
         private Queue<byte[]> sendingBytesQueue;
         private Guid? ConnectedDeviceId;
-
+        private Guid ServiceId;
         public bool IsConfiguring { get; private set; }
         public bool IsConnected => ConnectedDevice != null;
-
+        public bool TryReconnect = false;
         public delegate void DeviceDisconnectedEventHandler(object sender, EventArgs e);
         public event DeviceDisconnectedEventHandler? DeviceDisconnected;
         public delegate void ReceiveNotificationEventHandler(object sender, ReceivedNotificationEventArgs e);
         public event ReceiveNotificationEventHandler? OnReceive;
 
-        public BleCommunicationClientManager(IBluetoothLE ble, IAdapter adapter)
+        public BleCommunicationClientManager(IBluetoothLE ble, IAdapter adapter, Guid serviceId)
         {
             devices = new List<IDevice>();
             sendingBytesQueue = new Queue<byte[]>();
             this.ble = ble;
             this.adapter = adapter;
+            this.ServiceId = serviceId;
             this.adapter.DeviceDiscovered += (s, e) => //デバイスの検出
             {
                 Console.WriteLine($"Device Discovered: {e.Device.Name}");
                 devices.Add(e.Device);
             };
-            this.adapter.DeviceDisconnected += (s, e) => //デバイスの切断
+            this.adapter.DeviceDisconnected += async (s, e) => //デバイスの切断
             {
                 Console.WriteLine("Device Disconnected");
                 ConnectedDevice = null;
                 CurrentCharacteristic = null;
                 DeviceDisconnected?.Invoke(this, EventArgs.Empty);
+                if (TryReconnect)
+                {
+                    await Task.Delay(1000);
+                    try
+                    {
+                        await ConnectToService(serviceId, true);
+                    } catch(Exception ex)
+                    {
+                        Console.WriteLine("Failed to Reconnect, Message : {0}", ex.Message);
+                    }
+                    
+                }
             };
             ble.StateChanged += (s, e) =>
             {
                 Console.WriteLine($"BLE State Changed: {e.NewState}");
             };
             Task.Run(ManagerMainLoop);
+            ServiceId = serviceId;
         }
 
         public delegate void DataSentEventHandler(object sender, DataSentEventArgs e);
