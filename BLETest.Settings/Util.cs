@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BLETest.Settings
+namespace BLETest.Common
 {
     public class Util
     {

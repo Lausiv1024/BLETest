@@ -1,4 +1,5 @@
-﻿using BLETest.Settings;
+﻿using BLETest.Crypto;
+using BLETest.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,7 @@ namespace BLETest
         private GattLocalCharacteristic localCharasteristic;
         public delegate void OnDataReceivedEventHandler(object sender, OnDataReceivedEventArgs e);
         public event OnDataReceivedEventHandler OnDataReceived;
+        GattServerCryptoManager gattServerCryptoManager;
         /// <summary>
         /// 1つのGattCharastricを用いて、BLE通信を行う
         /// </summary>
@@ -71,7 +73,11 @@ namespace BLETest
                 deferral.Complete();
                 OnDataReceived?.Invoke(this, new OnDataReceivedEventArgs(buf, args.Session.DeviceId.Id));
             };
-
+            gattServerCryptoManager = new GattServerCryptoManager(localCharasteristic);
+            OnDataReceived +=async (sender, e) =>
+            {
+                await gattServerCryptoManager.HandleReceive(e.Data);
+            };
             GattServiceProviderAdvertisingParameters advertisingParameters = new GattServiceProviderAdvertisingParameters
             {
                 IsDiscoverable = true,
@@ -84,6 +90,12 @@ namespace BLETest
         public async Task NotifyAsync(byte[] data)
         {
             await localCharasteristic?.NotifyValueAsync(data.AsBuffer());
+        }
+
+        private void HandleRead(GattReadRequestedEventArgs e)
+        {
+            gattServerCryptoManager.Init();
+
         }
     }
 

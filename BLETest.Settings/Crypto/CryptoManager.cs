@@ -9,25 +9,31 @@ using Org.BouncyCastle.Security;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
+
 
 namespace BLETest.Common.Crypto
 {
     public abstract class CryptoManager
     {
         private byte[] CommonKey;
-        private AsymmetricKeyParameter myPrivateKey;
-        private AsymmetricKeyParameter myPublicKey;
-        private AsymmetricKeyParameter peerPublicKey;
+        protected AsymmetricKeyParameter myPrivateKey;
+        protected AsymmetricKeyParameter myPublicKey;
+        protected AsymmetricKeyParameter peerPublicKey;
         private BigInteger SecretKey;
         private bool IsServerSide;
         public static readonly byte[] StartData = new byte[] {0x20, 0x40 };
+        public static readonly byte[] OKData = new byte[] { 0x24, 0x41 };
         public CryptoManager(bool IsServerSide)
         {
             this.IsServerSide = IsServerSide;
+            var keyPair = generateECDHKeyPair(Util.K283DomainParameters());
+            myPrivateKey = keyPair.Private;
+            myPublicKey = keyPair.Public;
         }
 
         public abstract void Init();
-        protected abstract void SendPubKey(AsymmetricKeyParameter pubKey);
+        protected abstract Task SendPubKey(AsymmetricKeyParameter pubKey);
         protected abstract AsymmetricKeyParameter ReceivePeerKey();
         protected AsymmetricCipherKeyPair generateECDHKeyPair(ECDomainParameters ecParams)
         {

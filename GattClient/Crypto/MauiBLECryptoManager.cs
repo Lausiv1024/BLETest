@@ -1,5 +1,6 @@
 ﻿using BLETest.Common.Crypto;
 using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Parameters;
 using Plugin.BLE.Abstractions.Contracts;
 using System;
 using System.Collections.Generic;
@@ -27,9 +28,10 @@ namespace GattClient.Crypto
             throw new NotImplementedException();
         }
 
-        protected override void SendPubKey(AsymmetricKeyParameter pubKey)
+        protected override async Task SendPubKey(AsymmetricKeyParameter pubKey)
         {
-            throw new NotImplementedException();
+            var pubKeyData = ((ECPublicKeyParameters)pubKey).Q.GetEncoded();
+            await Characteristic.WriteAsync(pubKeyData);
         }
     }
 }
