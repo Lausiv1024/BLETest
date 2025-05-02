@@ -19,9 +19,11 @@ namespace BLETest.Common.Crypto
         private AsymmetricKeyParameter myPublicKey;
         private AsymmetricKeyParameter peerPublicKey;
         private BigInteger SecretKey;
-        public CryptoManager()
+        private bool IsServerSide;
+        public static readonly byte[] StartData = new byte[] {0x20, 0x40 };
+        public CryptoManager(bool IsServerSide)
         {
-
+            this.IsServerSide = IsServerSide;
         }
 
         public abstract void Init();
@@ -38,17 +40,12 @@ namespace BLETest.Common.Crypto
             return ecKeyPair;
         }
 
-        protected BigInteger DoAgreement(AsymmetricKeyParameter privateKey, AsymmetricKeyParameter pubKey)
+        protected BigInteger ComputeSharedSecret(AsymmetricKeyParameter privateKey, AsymmetricKeyParameter pubKey)
         {
             var keyAgreement = new ECDHBasicAgreement();
             keyAgreement.Init(privateKey);
             var secret = keyAgreement.CalculateAgreement(pubKey);
             return secret;
-        }
-
-        private void CreateKey(AsymmetricCipherKeyPair ecKeyPair)
-        {
-            
         }
     }
 }

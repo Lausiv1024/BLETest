@@ -1,4 +1,6 @@
 ﻿using BLETest.Common.Crypto;
+using Org.BouncyCastle.Crypto;
+using Plugin.BLE.Abstractions.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,17 +11,23 @@ namespace GattClient.Crypto
 {
     internal class MauiBLECryptoManager : CryptoManager
     {
-        public MauiBLECryptoManager()
+        ICharacteristic Characteristic { get; }
+        public MauiBLECryptoManager(ICharacteristic characteristic) : base(false)
         {
-
+            Characteristic = characteristic;
         }
 
-        public override void Init()
+        public override async void Init()
+        {
+            await Characteristic.WriteAsync(StartData);
+        }
+
+        protected override AsymmetricKeyParameter ReceivePeerKey()
         {
             throw new NotImplementedException();
         }
 
-        protected override void SendPubKey()
+        protected override void SendPubKey(AsymmetricKeyParameter pubKey)
         {
             throw new NotImplementedException();
         }
