@@ -56,7 +56,6 @@ namespace GattClient
                     {
                         Console.WriteLine("Failed to Reconnect, Message : {0}", ex.Message);
                     }
-                    
                 }
             };
             ble.StateChanged += (s, e) =>

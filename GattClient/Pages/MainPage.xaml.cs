@@ -75,12 +75,14 @@ namespace GattClient
             {
                 //初回起動時のみインスタンスを生成・初期化
                 //おそらくLoadedは一度しか呼ばれないが、念のためnullチェック
-                manager = new BleCommunicationClientManager(CrossBluetoothLE.Current, CrossBluetoothLE.Current.Adapter);
+                manager = new BleCommunicationClientManager(CrossBluetoothLE.Current, CrossBluetoothLE.Current.Adapter, BLESettings.ServiceId);
                 manager.OnReceive += Manager_OnReceive;
                 manager.OnDataSent += Manager_OnDataSent;
+                manager.TryReconnect = true;
             }
             if (!manager.IsConnected)
                 await manager.ConfigureCharacteristic(BLESettings.ServiceId, BLESettings.BleCommunicationCCharacteristic);
+     
             if (manager.IsConnected)
                 ReceivedValue.Text += $"Setup done\n";
             else
