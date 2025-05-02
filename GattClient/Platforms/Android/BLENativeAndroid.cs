@@ -27,6 +27,7 @@ namespace GattClient
 
     /// <summary>
     /// ここにBluetoothAdapterを格納する。
+    /// Activity上のOncreateで初期化する。
     /// </summary>
     public class BLENativeManager
     {
@@ -49,30 +50,34 @@ namespace GattClient
     {
         private bool isScanning = false;
         private BluetoothLeScanner scanner;
-        private Handler handler = new Handler();
         private ScanCallback callback = new BLEScanCallback();
+        private int ScanTime { get; }
+        /// <summary>
+        /// スキャンされたデバイスのリスト
+        /// </summary>
         public ReadOnlySpan<BluetoothDevice> Devices => ((BLEScanCallback)callback).Devices;
-        public BLEServiceScannerNativeAndroid()
+        /// <summary>
+        /// BLEServiceScannerNativeAndroidのコンストラクタ
+        /// デフォルトのスキャン時間は10秒
+        /// </summary>
+        public BLEServiceScannerNativeAndroid() : this(10000)
         {
+        }
+        public BLEServiceScannerNativeAndroid(int scanTime)
+        {
+            ScanTime = scanTime;
             scanner = BLENativeManager.Current.Adapter.BluetoothLeScanner;
         }
-        private　async Task scanLeDevice()
+        public　async Task ScanLeDevice()
         {
             if (!isScanning)
             {
                 isScanning = true;
-                handler.PostDelayed(() =>
-                {
-                    //デバイスのスキャンを10秒後に停止
-                    isScanning = false;
-                    scanner.StopScan(callback);
-                }, 10000);
                 //デバイスのスキャンを開始
                 scanner.StartScan(new List<ScanFilter>(), new ScanSettings.Builder().Build(), callback);
-                while (isScanning)
-                {
-                    await Task.Delay(100); //スキャンが終わるまで待機
-                }
+                await Task.Delay(ScanTime);
+                scanner.StopScan(callback);
+                isScanning = false;
             } else
             {
                 isScanning = false;
