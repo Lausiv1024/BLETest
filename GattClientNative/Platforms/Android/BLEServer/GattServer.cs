@@ -26,7 +26,8 @@ namespace GattServerNative.Platforms.Android.BLEServer
             characteristic = new BluetoothGattCharacteristic(Util.FromGuid(BLESettings.BLEMobileServerCharacteristic),
                 GattProperty.Read | GattProperty.Write | GattProperty.Notify,
                 GattPermission.Read | GattPermission.Write);
-            
+            bluetoothService.AddCharacteristic(characteristic);
+
         }
     }
 }
