@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Shell
-    x:Class="GattClientNative.AppShell"
+    x:Class="GattServerNative.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:GattClientNative"
+    xmlns:local="clr-namespace:GattServerNative"
     Shell.FlyoutBehavior="Flyout"
     Title="GattClientNative">
 

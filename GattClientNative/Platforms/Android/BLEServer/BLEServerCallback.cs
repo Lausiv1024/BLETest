@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GattClientNative.Platforms.Android.BLEServer
+namespace GattServerNative.Platforms.Android.BLEServer
 {
     internal class BLEServerCallback
     {

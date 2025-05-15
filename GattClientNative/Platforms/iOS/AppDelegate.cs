@@ -1,6 +1,6 @@
 ﻿using Foundation;
 
-namespace GattClientNative
+namespace GattServerNative
 {
     [Register("AppDelegate")]
     public class AppDelegate : MauiUIApplicationDelegate

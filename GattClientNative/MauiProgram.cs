@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace GattClientNative
+namespace GattServerNative
 {
     public static class MauiProgram
     {

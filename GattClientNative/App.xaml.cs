@@ -1,4 +1,4 @@
-﻿namespace GattClientNative
+﻿namespace GattServerNative
 {
     public partial class App : Application
     {

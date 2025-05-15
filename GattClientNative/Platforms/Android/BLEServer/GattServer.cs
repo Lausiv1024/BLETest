@@ -8,7 +8,7 @@ using Android.Bluetooth.LE;
 using Android.Content;
 using BLETest.Settings;
 using Random = System.Random;
-namespace GattClientNative.Platforms.Android.BLEServer
+namespace GattServerNative.Platforms.Android.BLEServer
 {
     internal class GattServer
     {

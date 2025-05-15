@@ -1,4 +1,4 @@
-﻿namespace GattClientNative;
+﻿namespace GattServerNative;
 
 using Java.Util;
 public class Util

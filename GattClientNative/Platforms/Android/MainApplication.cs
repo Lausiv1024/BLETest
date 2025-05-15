@@ -1,7 +1,7 @@
 ﻿using Android.App;
 using Android.Runtime;
 
-namespace GattClientNative
+namespace GattServerNative
 {
     [Application]
     public class MainApplication : MauiApplication

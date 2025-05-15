@@ -1,7 +1,7 @@
 ﻿using ObjCRuntime;
 using UIKit;
 
-namespace GattClientNative
+namespace GattServerNative
 {
     public class Program
     {
