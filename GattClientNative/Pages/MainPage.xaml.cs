@@ -5,10 +5,12 @@ namespace GattServerNative;
 public partial class MainPage : ContentPage
 {
     int count = 0;
+    private GattServer GattServer;
 
     public MainPage()
     {
         InitializeComponent();
+       GattServer = new GattServer(Android.App.Application.Context);
     }
 
     private void OnCounterClicked(object sender, EventArgs e)
