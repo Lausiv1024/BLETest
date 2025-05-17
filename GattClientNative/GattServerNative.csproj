@@ -62,10 +62,15 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
+		<PackageReference Include="R3" Version="1.3.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\BLETest.Settings\BLETest.Settings.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="BLESystem\" />
 	</ItemGroup>
 
 </Project>

@@ -9,6 +9,7 @@ using Android.Bluetooth.LE;
 using Android.Content;
 using Android.Runtime;
 using BLETest.Settings;
+using Microsoft.Maui.Animations;
 using Random = System.Random;
 namespace GattServerNative.Platforms.Android.BLEServer;
 
@@ -23,20 +24,26 @@ internal class GattServer
     public GattServer(Context ctx)
     {
         bluetoothManager =(BluetoothManager)ctx.GetSystemService(Context.BluetoothService);
-
         bluetoothAdapter = bluetoothManager.Adapter;
-        bluetoothServerCallback = new();
+
+        bluetoothServerCallback = new BLEServerCallback();
+        bluetoothServerCallback.CharacteristicReadRequest += BluetoothServerCallback_CharacteristicReadRequest;
+        bluetoothServerCallback.CharacteristicWriteRequest += BluetoothServerCallback_CharacteristicWriteRequest;
+        bluetoothServerCallback.NotificationSent += BluetoothServerCallback_NotificationSent;
         bluetoothServer = bluetoothManager.OpenGattServer(ctx, bluetoothServerCallback);
         
         var bluetoothService = new BluetoothGattService(Util.FromGuid(BLESettings.BLEMobileServerService), GattServiceType.Primary);
         characteristic = new BluetoothGattCharacteristic(Util.FromGuid(BLESettings.BLEMobileServerCharacteristic),
             GattProperty.Read | GattProperty.Write | GattProperty.Notify,
             GattPermission.Read | GattPermission.Write);
+        characteristic.AddDescriptor(new BluetoothGattDescriptor(Util.FromGuid(Guid.Parse("0196ddba-55c5-725b-a6f4-ffec13f8e1d5")),
+            GattDescriptorPermission.Read | GattDescriptorPermission.Write));
+
         bluetoothService.AddCharacteristic(characteristic);
+
         bluetoothServer.AddService(bluetoothService);
 
-        bluetoothServerCallback.CharacteristicReadRequest += BluetoothServerCallback_CharacteristicReadRequest;
-        bluetoothServerCallback.NotificationSent += BluetoothServerCallback_NotificationSent;
+        Console.WriteLine("Server created");
 
         BluetoothLeAdvertiser advertiser = bluetoothAdapter.BluetoothLeAdvertiser;
 
@@ -52,14 +59,32 @@ internal class GattServer
         advertiser.StartAdvertising(builder.Build(), dataBuilder.Build(), new BleAdvertiseCallback());
     }
 
+    private void BluetoothServerCallback_CharacteristicWriteRequest(object? sender, BleEventArgs e)
+    {
+        Console.WriteLine("Received Value : {0}", Encoding.UTF8.GetString(e.Value));
+    }
+
+    public void NotifyData(byte[] data)
+    {
+        var devices = bluetoothManager.GetConnectedDevices(ProfileType.Gatt);
+        if (devices.Count == 0)
+            return;
+        bluetoothServer.NotifyCharacteristicChanged(devices[0], characteristic, false, data);
+    }
+
     private void BluetoothServerCallback_NotificationSent(object? sender, BleEventArgs e)
     {
-        throw new NotImplementedException();
+        bluetoothServer.NotifyCharacteristicChanged(e.Device, characteristic, false);
     }
+
+    int readRequestCount = 0;
 
     private void BluetoothServerCallback_CharacteristicReadRequest(object? sender, BleEventArgs e)
     {
-        throw new NotImplementedException();
+        readRequestCount++;
+        e.Characteristic.SetValue($"Value Updated : {readRequestCount}");
+        Console.WriteLine("Read Requested");
+        bluetoothServer.SendResponse(e.Device, e.RequestId, GattStatus.Success, e.Offset, e.Characteristic.GetValue());
     }
 
     public class BleAdvertiseCallback : AdvertiseCallback

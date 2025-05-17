@@ -1,5 +1,5 @@
 ﻿using GattServerNative.Platforms.Android.BLEServer;
-
+using System.Text;
 namespace GattServerNative;
 
 public partial class MainPage : ContentPage
@@ -23,6 +23,7 @@ public partial class MainPage : ContentPage
             CounterBtn.Text = $"Clicked {count} times";
 
         SemanticScreenReader.Announce(CounterBtn.Text);
+        GattServer.NotifyData(Encoding.UTF8.GetBytes(CounterBtn.Text));
     }
 
     private async void ContentPage_Loaded(object sender, EventArgs e)
