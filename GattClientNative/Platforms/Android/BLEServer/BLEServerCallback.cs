@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GattServerNative.Platforms.Android.BLEServer
+namespace GattClientNative.BLEServer
 {
     public class BleEventArgs : EventArgs
     {

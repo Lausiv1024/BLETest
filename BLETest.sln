@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GattClient", "GattClient\Ga
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLETest.Settings", "BLETest.Settings\BLETest.Settings.csproj", "{95080D09-C096-4114-8900-D4409B73EA1F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GattServerNative", "GattClientNative\GattServerNative.csproj", "{9BBB8A4E-7747-4DBA-AA3D-F9B9B2ECE806}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GattServerNative", "GattServerNative\GattServerNative.csproj", "{50563805-CA15-43D9-A01E-A0974590C3F0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,12 +30,16 @@ Global
 		{95080D09-C096-4114-8900-D4409B73EA1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{95080D09-C096-4114-8900-D4409B73EA1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{95080D09-C096-4114-8900-D4409B73EA1F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9BBB8A4E-7747-4DBA-AA3D-F9B9B2ECE806}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9BBB8A4E-7747-4DBA-AA3D-F9B9B2ECE806}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9BBB8A4E-7747-4DBA-AA3D-F9B9B2ECE806}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9BBB8A4E-7747-4DBA-AA3D-F9B9B2ECE806}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50563805-CA15-43D9-A01E-A0974590C3F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50563805-CA15-43D9-A01E-A0974590C3F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50563805-CA15-43D9-A01E-A0974590C3F0}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{50563805-CA15-43D9-A01E-A0974590C3F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50563805-CA15-43D9-A01E-A0974590C3F0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {116DC6FE-8D53-445D-9A76-6F93DA7AB78C}
 	EndGlobalSection
 EndGlobal

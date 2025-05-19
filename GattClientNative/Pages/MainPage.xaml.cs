@@ -1,4 +1,4 @@
-﻿using GattServerNative.Platforms.Android.BLEServer;
+﻿using GattClientNative.BLEServer;
 using System.Text;
 namespace GattServerNative;
 
@@ -6,11 +6,13 @@ public partial class MainPage : ContentPage
 {
     int count = 0;
     private GattServer GattServer;
-
+    private GattServerService GattServerService;
     public MainPage()
     {
         InitializeComponent();
-       GattServer = new GattServer(Android.App.Application.Context);
+        GattServer = new GattServer(Android.App.Application.Context);
+        GattServerService = new GattServerService();
+        GattServerService.StartServer();
     }
 
     private void OnCounterClicked(object sender, EventArgs e)

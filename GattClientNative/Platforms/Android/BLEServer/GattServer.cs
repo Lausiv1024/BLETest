@@ -9,9 +9,10 @@ using Android.Bluetooth.LE;
 using Android.Content;
 using Android.Runtime;
 using BLETest.Settings;
+using GattServerNative;
 using Microsoft.Maui.Animations;
 using Random = System.Random;
-namespace GattServerNative.Platforms.Android.BLEServer;
+namespace GattClientNative.BLEServer;
 
 internal class GattServer
 {
@@ -32,11 +33,11 @@ internal class GattServer
         bluetoothServerCallback.NotificationSent += BluetoothServerCallback_NotificationSent;
         bluetoothServer = bluetoothManager.OpenGattServer(ctx, bluetoothServerCallback);
         
-        var bluetoothService = new BluetoothGattService(Util.FromGuid(BLESettings.BLEMobileServerService), GattServiceType.Primary);
-        characteristic = new BluetoothGattCharacteristic(Util.FromGuid(BLESettings.BLEMobileServerCharacteristic),
+        var bluetoothService = new BluetoothGattService(GattServerNative.Util.FromGuid(BLESettings.BLEMobileServerService), GattServiceType.Primary);
+        characteristic = new BluetoothGattCharacteristic(GattServerNative.Util.FromGuid(BLESettings.BLEMobileServerCharacteristic),
             GattProperty.Read | GattProperty.Write | GattProperty.Notify,
             GattPermission.Read | GattPermission.Write);
-        characteristic.AddDescriptor(new BluetoothGattDescriptor(Util.FromGuid(Guid.Parse("0196ddba-55c5-725b-a6f4-ffec13f8e1d5")),
+        characteristic.AddDescriptor(new BluetoothGattDescriptor(GattServerNative.Util.FromGuid(Guid.Parse("0196ddba-55c5-725b-a6f4-ffec13f8e1d5")),
             GattDescriptorPermission.Read | GattDescriptorPermission.Write));
 
         bluetoothService.AddCharacteristic(characteristic);
@@ -62,6 +63,7 @@ internal class GattServer
     private void BluetoothServerCallback_CharacteristicWriteRequest(object? sender, BleEventArgs e)
     {
         Console.WriteLine("Received Value : {0}", Encoding.UTF8.GetString(e.Value));
+        bluetoothServer.SendResponse(e.Device, e.RequestId, GattStatus.Success, e.Offset, [0x00]);
     }
 
     public void NotifyData(byte[] data)
