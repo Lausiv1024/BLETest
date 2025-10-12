@@ -1,0 +1,10 @@
+<Solution>
+  <Project Path="BLETest.Settings/BLETest.Settings.csproj" />
+  <Project Path="BLETest/BLETest.csproj" Id="11fb533e-bb06-4167-bac4-70f937c4658d" />
+  <Project Path="GattClient/GattClient.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
+  <Project Path="GattServerNative/GattServerNative.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
+</Solution>
