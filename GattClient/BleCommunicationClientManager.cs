@@ -4,6 +4,7 @@ using Plugin.BLE.Abstractions.Contracts;
 using Plugin.BLE.Abstractions.Exceptions;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -65,28 +66,25 @@ namespace GattClient
                     if (sendingBytesQueue.Count > 0)
                     {
                         var data = sendingBytesQueue.Dequeue();
+                        var sw = new Stopwatch();
+                        sw.Start();
+                        await Task.Delay(1);
+                        sw.Stop();
 
-                        long s = DateTime.Now.Ticks;
-                        await CurrentCharacteristic.WriteAsync(data);//なぜかここで50~100ms程度の処理時間が生じる
-                        long e = DateTime.Now.Ticks;
-
-                        Console.WriteLine($"Sending time: {Util.ToMilliseconds(e - s)}ms");
-                        OnDataSent?.Invoke(this, new DataSentEventArgs(e - s));
-                    }
-                    else if (c % 1000 == 0)
-                    {
-                        //await CurrentCharacteristic.ReadAsync();
-                    }
-                }
-
-                await Task.Delay(1);
+                        OnDataSent?.Invoke(this, new DataSentEventArgs(sw.ElapsedMilliseconds));
+                    } else
+                        await Task.Delay(1);
+                }else
+                    await Task.Delay(1);
                 c++;
             }
         }
 
         public async Task<long> SendDataAsync(byte[] data)
         {
-            sendingBytesQueue.Enqueue(data);
+            //sendingBytesQueue.Enqueue(data);
+            await CurrentCharacteristic?.WriteAsync(data);//なぜかここで50~100ms程度の処理時間が生じる
+            
             return 0;
         }
         private async Task DisconnectDevice()
@@ -123,6 +121,7 @@ namespace GattClient
             };
             await c.StartUpdatesAsync();
             CurrentCharacteristic = c;
+            //CurrentCharacteristic.WriteType = CharacteristicWriteType.WithoutResponse;
             IsConfiguring = false;
         }
 

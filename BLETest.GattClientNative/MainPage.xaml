@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BLETest.GattClientNative.MainPage"
+             Title="BLE Gatt Client">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="20"
+            Spacing="15">
+
+            <!-- 接続状態表示 -->
+            <Label
+                x:Name="ConnectionStatusLabel"
+                Text="Disconnected"
+                FontSize="18"
+                FontAttributes="Bold"
+                HorizontalTextAlignment="Center"
+                TextColor="Red" />
+
+            <!-- スキャン&自動接続ボタン -->
+            <Button
+                x:Name="AutoConnectButton"
+                Text="Scan and Auto Connect"
+                Clicked="OnAutoConnectButtonClicked"
+                HorizontalOptions="Fill"
+                BackgroundColor="#2196F3" />
+
+            <!-- 手動スキャンボタン -->
+            <Button
+                x:Name="ScanButton"
+                Text="Scan Devices (Manual)"
+                Clicked="OnScanButtonClicked"
+                HorizontalOptions="Fill" />
+
+            <!-- デバイスリスト -->
+            <Label
+                Text="Available Devices:"
+                FontSize="16"
+                FontAttributes="Bold"
+                IsVisible="False"
+                x:Name="DevicesLabel" />
+
+            <CollectionView
+                x:Name="DevicesCollectionView"
+                IsVisible="False"
+                SelectionMode="Single"
+                SelectionChanged="OnDeviceSelected">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Padding="10" Margin="5" BorderColor="LightGray">
+                            <VerticalStackLayout>
+                                <Label Text="{Binding Name}" FontSize="14" FontAttributes="Bold" />
+                                <Label Text="{Binding Address}" FontSize="12" TextColor="Gray" />
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- 切断ボタン -->
+            <Button
+                x:Name="DisconnectButton"
+                Text="Disconnect"
+                Clicked="OnDisconnectButtonClicked"
+                IsVisible="False"
+                HorizontalOptions="Fill" />
+
+            <!-- メッセージ受信エリア -->
+            <Label
+                Text="Received Messages:"
+                FontSize="16"
+                FontAttributes="Bold" />
+
+            <Frame
+                BorderColor="LightGray"
+                CornerRadius="5"
+                Padding="10"
+                HeightRequest="200">
+                <ScrollView>
+                    <Label
+                        x:Name="ReceivedMessagesLabel"
+                        Text=""
+                        FontSize="14"
+                        TextColor="Black"
+                        LineBreakMode="WordWrap" />
+                </ScrollView>
+            </Frame>
+
+            <!-- メッセージ送信エリア -->
+            <Label
+                Text="Send Message:"
+                FontSize="16"
+                FontAttributes="Bold" />
+
+            <Entry
+                x:Name="MessageEntry"
+                Placeholder="Enter text to send..."
+                FontSize="14" />
+
+            <Button
+                x:Name="SendButton"
+                Text="Send"
+                Clicked="OnSendButtonClicked"
+                IsEnabled="False"
+                HorizontalOptions="Fill" />
+            <Button
+                x:Name="RealtimeStateSend"
+                Text="RealtimeButtonState"
+                Pressed="RealtimeStateSend_Pressed"
+                Released="RealtimeStateSend_Released"
+                IsEnabled="False"
+                HorizontalOptions="Fill"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

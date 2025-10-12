@@ -91,7 +91,7 @@ namespace GattClient
 
         private void Manager_OnDataSent(object sender, DataSentEventArgs e)
         {
-            Dispatcher.Dispatch(() => ReceivedValue.Text += $"Sending Spent Ticks : {Util.ToMilliseconds(e.SentTime)}\n");
+            Dispatcher.Dispatch(() => ReceivedValue.Text += $"Sending Spent Milliseconds : {e.SentTime}\n");
         }
 
         private void Manager_OnReceive(object sender, ReceivedNotificationEventArgs e)

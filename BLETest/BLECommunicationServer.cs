@@ -6,6 +6,8 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
+using System.Diagnostics;
+using Windows.Storage.Streams;
 namespace BLETest
 {
     public class BLECommunicationServer
@@ -47,11 +49,12 @@ namespace BLETest
             localCharasteristic = cReadWrite.Characteristic;
             localCharasteristic.ReadRequested += async (sender, args) =>
             {
+                var sw = new Stopwatch();
                 var deferral = args.GetDeferral();
-                long s = DateTime.Now.Ticks;
+                sw.Start();
                 var request = await args.GetRequestAsync();
-                long e = DateTime.Now.Ticks;
-                Console.WriteLine("GetRequest Time : {0}",Util.ToMilliseconds(e - s));
+                sw.Stop();
+                Console.WriteLine("GetRequest Time : {0}ms", sw.ElapsedMilliseconds);
                 byte[] buf = new byte[] { 0x20};
                 request.RespondWithValue(buf.AsBuffer());
                 deferral.Complete();
@@ -59,17 +62,21 @@ namespace BLETest
             localCharasteristic.WriteRequested += async (sender, args) =>
             {
                 var deferral = args.GetDeferral();
-                long s = DateTime.Now.Ticks;
+
                 var request = await args.GetRequestAsync();
-                long e = DateTime.Now.Ticks;
-                Console.WriteLine("GetRequest Time : {0}", e - s);
                 var buf = request.Value.ToArray();
+                Console.WriteLine("WriteRequested: " + BitConverter.ToString(buf));
+
+                OnDataReceived?.Invoke(this, new OnDataReceivedEventArgs(buf, args.Session.DeviceId.Id));
+
                 if (request.Option == GattWriteOption.WriteWithResponse)
                 {
                     request.Respond();
+                    Console.WriteLine("Respond to write Request");
                 }
+                
                 deferral.Complete();
-                OnDataReceived?.Invoke(this, new OnDataReceivedEventArgs(buf, args.Session.DeviceId.Id));
+
             };
 
             GattServiceProviderAdvertisingParameters advertisingParameters = new GattServiceProviderAdvertisingParameters
