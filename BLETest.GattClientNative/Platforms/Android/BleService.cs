@@ -8,7 +8,8 @@ namespace BLETest.GattClientNative.Platforms.Android
     {
         private readonly Context _context;
         private readonly Guid _serviceUuid;
-        private readonly Guid _characteristicUuid;
+        private readonly Guid _writeCharacteristicUuid;
+        private readonly Guid _notifyCharacteristicUuid;
         private BluetoothAdapter? _bluetoothAdapter;
         private BleScanner? _scanner;
         private BleGattClient? _gattClient;
@@ -17,11 +18,12 @@ namespace BLETest.GattClientNative.Platforms.Android
         public event EventHandler<string>? ConnectionStateChanged;
         public bool IsConnected => _gattClient?.IsConnected ?? false;
 
-        public BleService(Guid serviceUuid, Guid characteristicUuid)
+        public BleService(Guid serviceUuid, Guid writeCharacteristicUuid, Guid notifyCharacteristicUuid)
         {
             _context = global::Android.App.Application.Context;
             _serviceUuid = serviceUuid;
-            _characteristicUuid = characteristicUuid;
+            _writeCharacteristicUuid = writeCharacteristicUuid;
+            _notifyCharacteristicUuid = notifyCharacteristicUuid;
         }
 
         public Task InitializeAsync()
@@ -113,7 +115,7 @@ namespace BLETest.GattClientNative.Platforms.Android
                 return Task.FromResult(false);
             }
 
-            _gattClient = new BleGattClient(_context, _serviceUuid, _characteristicUuid);
+            _gattClient = new BleGattClient(_context, _serviceUuid, _writeCharacteristicUuid, _notifyCharacteristicUuid);
             _gattClient.MessageReceived += (s, e) => MessageReceived?.Invoke(this, e);
             _gattClient.ConnectionStateChanged += (s, e) => ConnectionStateChanged?.Invoke(this, e);
 

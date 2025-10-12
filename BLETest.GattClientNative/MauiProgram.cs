@@ -24,7 +24,10 @@ namespace BLETest.GattClientNative
             // BLEサービスをDIコンテナに登録
 #if ANDROID
             builder.Services.AddSingleton<IBleService>(
-                new Platforms.Android.BleService(BLESettings.ServiceId, BLESettings.BleCommunicationCCharacteristic));
+                new Platforms.Android.BleService(
+                    BLESettings.ServiceId,
+                    BLESettings.WriteCharacteristic,
+                    BLESettings.NotifyCharacteristic));
 #endif
 
             builder.Services.AddSingleton<MainPage>();

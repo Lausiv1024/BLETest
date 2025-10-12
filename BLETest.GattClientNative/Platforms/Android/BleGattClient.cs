@@ -11,21 +11,24 @@ namespace BLETest.GattClientNative.Platforms.Android
     public class BleGattClient
     {
         private BluetoothGatt? _bluetoothGatt;
-        private BluetoothGattCharacteristic? _characteristic;
+        private BluetoothGattCharacteristic? _writeCharacteristic;
+        private BluetoothGattCharacteristic? _notifyCharacteristic;
         private readonly Context _context;
         private readonly Guid _serviceUuid;
-        private readonly Guid _characteristicUuid;
+        private readonly Guid _writeCharacteristicUuid;
+        private readonly Guid _notifyCharacteristicUuid;
         private GattCallback? _gattCallback;
 
         public event EventHandler<string>? MessageReceived;
         public event EventHandler<string>? ConnectionStateChanged;
         public bool IsConnected { get; private set; }
 
-        public BleGattClient(Context context, Guid serviceUuid, Guid characteristicUuid)
+        public BleGattClient(Context context, Guid serviceUuid, Guid writeCharacteristicUuid, Guid notifyCharacteristicUuid)
         {
             _context = context;
             _serviceUuid = serviceUuid;
-            _characteristicUuid = characteristicUuid;
+            _writeCharacteristicUuid = writeCharacteristicUuid;
+            _notifyCharacteristicUuid = notifyCharacteristicUuid;
         }
 
         /// <summary>
@@ -50,22 +53,22 @@ namespace BLETest.GattClientNative.Platforms.Android
 
         public async Task<bool> WriteByteAsnyc(byte[] data)
         {
-            if (_bluetoothGatt == null || _characteristic == null || !IsConnected)
+            if (_bluetoothGatt == null || _writeCharacteristic == null || !IsConnected)
                 return false;
 
             try
             {
                 if (global::Android.OS.Build.VERSION.SdkInt >= global::Android.OS.BuildVersionCodes.Tiramisu)
                 {
-                    var result = _bluetoothGatt.WriteCharacteristic(_characteristic, data,(int) GattWriteType.Default);
+                    var result = _bluetoothGatt.WriteCharacteristic(_writeCharacteristic, data,(int) GattWriteType.NoResponse);
                     System.Diagnostics.Debug.WriteLine($"WriteCharacteristic result: {result}");
                     return result == 0;
                 } else
                 {
                     // 古いAPIでは setValue してから writeCharacteristic を呼ぶ
 #pragma warning disable CS0618 // 型またはメンバーが旧型式です
-                    _characteristic.SetValue(data);
-                    return _bluetoothGatt.WriteCharacteristic(_characteristic);
+                    _writeCharacteristic.SetValue(data);
+                    return _bluetoothGatt.WriteCharacteristic(_writeCharacteristic);
 #pragma warning restore CS0618
                 }
             } catch(Exception ex)
@@ -80,7 +83,7 @@ namespace BLETest.GattClientNative.Platforms.Android
         /// </summary>
         public async Task<bool> WriteTextAsync(string text)
         {
-            if (_bluetoothGatt == null || _characteristic == null || !IsConnected)
+            if (_bluetoothGatt == null || _notifyCharacteristic == null || _writeCharacteristic == null || !IsConnected)
             {
                 return false;
             }
@@ -111,14 +114,19 @@ namespace BLETest.GattClientNative.Platforms.Android
                 var service = gatt.GetService(Java.Util.UUID.FromString(_serviceUuid.ToString()));
                 if (service != null)
                 {
-                    _characteristic = service.GetCharacteristic(Java.Util.UUID.FromString(_characteristicUuid.ToString()));
-                    if (_characteristic != null)
+                    // Write用キャラクタリスティックを取得
+                    _writeCharacteristic = service.GetCharacteristic(Java.Util.UUID.FromString(_writeCharacteristicUuid.ToString()));
+
+                    // Notify用キャラクタリスティックを取得
+                    _notifyCharacteristic = service.GetCharacteristic(Java.Util.UUID.FromString(_notifyCharacteristicUuid.ToString()));
+
+                    if (_writeCharacteristic != null && _notifyCharacteristic != null)
                     {
                         // Notificationを有効化
-                        gatt.SetCharacteristicNotification(_characteristic, true);
+                        gatt.SetCharacteristicNotification(_notifyCharacteristic, true);
 
                         // CCCDを設定してNotificationを有効化
-                        var descriptor = _characteristic.GetDescriptor(
+                        var descriptor = _notifyCharacteristic.GetDescriptor(
                             Java.Util.UUID.FromString("00002902-0000-1000-8000-00805f9b34fb")); // Client Characteristic Configuration Descriptor
 
                         if (descriptor != null)
@@ -137,6 +145,10 @@ namespace BLETest.GattClientNative.Platforms.Android
                         }
 
                         ConnectionStateChanged?.Invoke(this, "Ready");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Characteristics not found - Write: {_writeCharacteristic != null}, Notify: {_notifyCharacteristic != null}");
                     }
                 }
             }

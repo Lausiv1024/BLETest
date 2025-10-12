@@ -32,7 +32,11 @@ namespace BLETest
 
         public async Task BLEMain()
         {
-            _bleCommunicationServer = new BLECommunicationServer(BLESettings.ServiceId, BLESettings.BleCommunicationCCharacteristic, "BLETest");
+            _bleCommunicationServer = new BLECommunicationServer(
+                BLESettings.ServiceId,
+                BLESettings.WriteCharacteristic,
+                BLESettings.NotifyCharacteristic,
+                "BLETest");
             _bleCommunicationServer.OnDataReceived += (sender, e) =>
             {
                 if (e.Data.Length >= 2 && e.Data[0] == 0xFF){
