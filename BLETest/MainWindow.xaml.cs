@@ -42,11 +42,11 @@ namespace BLETest
                 if (e.Data.Length >= 2 && e.Data[0] == 0xFF){
                     if (e.Data[1] == 0x80)
                     {
-                        Dispatcher.InvokeAsync(() => NotifyBut.Content = "1");
+                        //Dispatcher.InvokeAsync(() => NotifyBut.Content = "1");
                         KeyControl.KeyDown(0x31); // '1' key down
                     } else if (e.Data[1] == 0x81)
                     {
-                        Dispatcher.InvokeAsync(() => NotifyBut.Content = "0");
+                        //Dispatcher.InvokeAsync(() => NotifyBut.Content = "0");
                         KeyControl.KeyUp(0x31); // '1' key up
                     }
                     return;
