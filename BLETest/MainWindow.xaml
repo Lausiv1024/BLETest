@@ -6,17 +6,24 @@
         xmlns:local="clr-namespace:BLETest"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800" Initialized="Window_Initialized">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="Auto"/>
-        </Grid.ColumnDefinitions>
-        <TextBox x:Name="ReceivedVal" Margin="10" Grid.ColumnSpan="2"/>
-        <TextBox x:Name="SendVal" Margin="10" Grid.Row="1" KeyDown="SendVal_KeyDown"/>
-        <Button x:Name="NotifyBut" Margin="10" Grid.Row="1" Grid.Column="1" Content="Notify" Click="NotifyBut_Click" Padding="10"/>
-    </Grid>
+    <StackPanel VerticalAlignment="Stretch">
+        <Menu>
+            <MenuItem Header="File">
+                <MenuItem x:Name="NewDeviceMenu" Header="NewDevice" Click="NewDeviceMenu_Click"/>
+            </MenuItem>
+        </Menu>
+            <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="ReceivedVal" Margin="10" Grid.ColumnSpan="2" MinHeight="160"/>
+            <TextBox x:Name="SendVal" Margin="10" Grid.Row="1" KeyDown="SendVal_KeyDown"/>
+            <Button x:Name="NotifyBut" Margin="10" Grid.Row="1" Grid.Column="1" Content="Notify" Click="NotifyBut_Click" Padding="10"/>
+        </Grid>
+    </StackPanel>
 </Window>

@@ -86,5 +86,10 @@ namespace BLETest
                 
             }
         }
+
+        private void NewDeviceMenu_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
