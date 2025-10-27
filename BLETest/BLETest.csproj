@@ -60,6 +60,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BLEAuthenticationServer.cs" />
     <Compile Include="KeyControl.cs" />
     <Compile Include="NewDeviceDialog.xaml.cs">
       <DependentUpon>NewDeviceDialog.xaml</DependentUpon>
@@ -118,6 +119,9 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Windows.SDK.Contracts">
       <Version>10.0.26100.1742</Version>
+    </PackageReference>
+    <PackageReference Include="QRCoder">
+      <Version>1.7.0</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

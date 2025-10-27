@@ -89,7 +89,12 @@ namespace BLETest
 
         private void NewDeviceMenu_Click(object sender, RoutedEventArgs e)
         {
-
+            var dialog = new NewDeviceDialog("FF:FF:FF:FF:FF:FF", "----PUBLIC KEY----");
+            dialog.Owner = this;
+            if (dialog.ShowDialog() == true)
+            {
+                Console.WriteLine("New Device Added!");
+            }
         }
     }
 }

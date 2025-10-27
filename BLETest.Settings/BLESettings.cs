@@ -11,6 +11,9 @@ namespace BLETest.Settings
         public static readonly Guid WriteCharacteristic = Guid.Parse("0000ffe1-0000-1000-8000-00805f9b34fb");
         public static readonly Guid NotifyCharacteristic = Guid.Parse("0000ffe2-0000-1000-8000-00805f9b34fb");
 
+        public static readonly Guid AuthCharacteristicRead = Guid.Parse("0000fff1-0000-1000-8000-00805f9b34fb");
+        public static readonly Guid AuthCharacteristicWrite = Guid.Parse("0000fff2-0000-1000-8000-00805f9b34fb");
+
         public static readonly Guid ServiceIdEsp = Guid.Parse("b4d9bf8b-7751-4914-b0fd-71b63a32e266");
         public static readonly Guid BleCommunicationCCharacteristicEsp = Guid.Parse("a3fc6c40-b765-4945-883e-917003099b5e");
 
