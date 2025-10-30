@@ -15,5 +15,9 @@ namespace BLETest.Settings
         {
             return (int)TimeSpan.FromTicks(ticks).TotalMilliseconds;
         }
+        public static string ExecutingDirectory()
+        {
+            return AppDomain.CurrentDomain.BaseDirectory;
+        }
     }
 }
