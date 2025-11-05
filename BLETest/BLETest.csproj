@@ -65,6 +65,7 @@
     <Compile Include="NewDeviceDialog.xaml.cs">
       <DependentUpon>NewDeviceDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="RegisteredDeviceManager.cs" />
     <Compile Include="Win32Interops.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -117,6 +118,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="BouncyCastle.Cryptography">
+      <Version>2.6.2</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.Windows.SDK.Contracts">
       <Version>10.0.26100.1742</Version>
     </PackageReference>
