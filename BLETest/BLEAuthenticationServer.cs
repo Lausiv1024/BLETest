@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Devices.Bluetooth.GenericAttributeProfile;
 
 namespace BLETest
 {
     internal class BLEAuthenticationServer
     {
+        public const int BufferSize = 1024;
         private NewDeviceContext newDeviceContext = null;
+        private GattLocalCharacteristic authCharacteristic;
         public BLEAuthenticationServer() { }
 
         public void StartNewDeviceAcceptance()
