@@ -2,8 +2,29 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="using:FluentAvalonia.UI.Controls"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="BLETest.Desktop.MainWindow"
         Title="BLETest.Desktop">
-こんにちは！
+<Grid>
+	<Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="*"/>
+        <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+    <Menu>
+        <MenuItem Header="File">
+            <MenuItem x:Name="NewDeviceMenu" Header="NewDevice" Click="NewDeviceMenu_Click"/>
+        </MenuItem>
+    </Menu>
+    <TextBox x:Name="ReceivedVal" Margin="10" Grid.Row="1" MinHeight="160" AcceptsReturn="True"/>
+    <Grid Grid.Row="2">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <TextBox x:Name="SendVal" Margin="10" KeyDown="SendVal_KeyDown"/>
+        <Button x:Name="NotifyBut" Margin="10" Grid.Column="1" Content="Notify" Click="NotifyBut_Click" Padding="10"/>
+    </Grid>
+</Grid>
 </Window>
