@@ -20,6 +20,7 @@
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="FluentAvaloniaUI" Version="2.4.1" />
+    <PackageReference Include="QRCoder" Version="1.7.0" />
   </ItemGroup>
 
   <ItemGroup>

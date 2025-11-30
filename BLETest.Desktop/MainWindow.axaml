@@ -2,11 +2,28 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:ui="using:FluentAvalonia.UI.Controls"
+        xmlns:ui="using:FluentAvalonia.UI.Controls" 
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="BLETest.Desktop.MainWindow"
+        Initialized="Window_Initialized"
         Title="BLETest.Desktop">
 <Grid>
+    <ui:TaskDialog
+    Name="AddDevice"
+    Title="BLETest"
+    SubHeader="デバイスの追加"
+    >
+        <ui:TaskDialog.Content>
+            <StackPanel>
+                <TextBlock Text="新しいデバイスを追加します。" Margin="0,0,0,10"/>
+                <Image x:Name="QRImage" Width="400" Height="400"/>
+            </StackPanel>
+
+        </ui:TaskDialog.Content>
+		<ui:TaskDialog.Buttons>
+                <ui:TaskDialogButton Text="Cancel" DialogResult="Cancel"/>
+        </ui:TaskDialog.Buttons>
+    </ui:TaskDialog>
 	<Grid.RowDefinitions>
         <RowDefinition Height="Auto"/>
         <RowDefinition Height="*"/>
@@ -17,6 +34,7 @@
             <MenuItem x:Name="NewDeviceMenu" Header="NewDevice" Click="NewDeviceMenu_Click"/>
         </MenuItem>
     </Menu>
+
     <TextBox x:Name="ReceivedVal" Margin="10" Grid.Row="1" MinHeight="160" AcceptsReturn="True"/>
     <Grid Grid.Row="2">
         <Grid.ColumnDefinitions>
