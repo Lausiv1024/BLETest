@@ -21,6 +21,7 @@
     </PackageReference>
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.6.2" />
     <PackageReference Include="FluentAvaloniaUI" Version="2.4.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
     <PackageReference Include="QRCoder" Version="1.7.0" />
   </ItemGroup>
 
