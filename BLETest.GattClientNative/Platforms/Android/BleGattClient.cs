@@ -93,6 +93,7 @@ namespace BLETest.GattClientNative.Platforms.Android
 
         private void OnConnectionStateChange(BluetoothGatt gatt, GattStatus status, ProfileState newState)
         {
+            Console.WriteLine("Connection Status Changed   GattStatus: {0}   ProfileState:{1}", status, newState);
             if (newState == ProfileState.Connected)
             {
                 IsConnected = true;

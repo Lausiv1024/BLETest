@@ -1,3 +1,4 @@
+using BLETest.Settings;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,19 +13,56 @@ namespace BLETest;
 internal class BLEAuthenticationServer
 {
     public const int BufferSize = 1024;
-    private NewDeviceContext newDeviceContext = null;
+    private NewDeviceContext newDeviceContext = null!;
 
-    private GattLocalCharacteristic authCharacteristic;
+    private GattLocalCharacteristic authCharacteristicRead = null!;
+    private GattLocalCharacteristic authCharacteristicWrite = null!;
+    private GattServiceProvider gattServiceProvider = null!;
     public BLEAuthenticationServer() { }
 
-    public void StartNewDeviceAcceptance()
+    public async Task BLEInitializeAsync()
     {
-        // Implementation for starting new device acceptance
-    }
+        var gattSvcProviderRes = await GattServiceProvider.CreateAsync(BLESettings.AuthCharacteristicRead);
+        if (gattSvcProviderRes.Error != Windows.Devices.Bluetooth.BluetoothError.Success)
+        {
+            Console.WriteLine("Failed to create GattServiceProvider::" + gattSvcProviderRes.Error);
+            return;
+        }
+        var gattSvcProvider = gattSvcProviderRes.ServiceProvider;
+        gattServiceProvider = gattSvcProvider;
+        // Authentication Characteristic
+        var authParamRead = new GattLocalCharacteristicParameters
+        {
+            CharacteristicProperties =
+                GattCharacteristicProperties.Read,
+            WriteProtectionLevel = GattProtectionLevel.Plain,
+            ReadProtectionLevel = GattProtectionLevel.Plain,
+            UserDescription = "Authentication Characteristic"
+        };
+        var authParamWrite = new GattLocalCharacteristicParameters
+        {
+            CharacteristicProperties = GattCharacteristicProperties.Read|
+                GattCharacteristicProperties.Write,
+            WriteProtectionLevel = GattProtectionLevel.Plain,
+            ReadProtectionLevel = GattProtectionLevel.Plain,
+            UserDescription = "Authentication Characteristic"
+        };
 
-    public void StopNewDeviceAcceptance()
-    {
-        // Implementation for stopping new device acceptance
+
+        var authCharResult = await gattSvcProvider.Service.CreateCharacteristicAsync(
+            Guid.Parse("00002A9E-0000-1000-8000-00805F9B34FB"),
+            authParamRead);
+        if (authCharResult.Error != Windows.Devices.Bluetooth.BluetoothError.Success)
+        {
+            Console.WriteLine("Failed to create Authentication Characteristic::" + authCharResult.Error);
+            return;
+        }
+        authCharacteristicRead = authCharResult.Characteristic;
+        gattServiceProvider.StartAdvertising(new GattServiceProviderAdvertisingParameters
+        {
+            IsDiscoverable = true,
+            IsConnectable = true
+        });
     }
 }
 internal class NewDeviceContext
@@ -45,7 +83,7 @@ internal class BleDeviceManager
 {
     public static BleDeviceManager Default { get; } = new BleDeviceManager();
     const string DeviceStorageFileName = "RegisteredBleDevices.json";
-    private string storageFilePath = System.IO.Path.Combine(
+    private string storageFilePath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         DeviceStorageFileName);
 

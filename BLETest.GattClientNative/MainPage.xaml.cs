@@ -1,4 +1,4 @@
-﻿using BLETest.GattClientNative.Services;
+using BLETest.GattClientNative.Services;
 
 namespace BLETest.GattClientNative;
 
@@ -148,6 +148,7 @@ public partial class MainPage : ContentPage
         try
         {
             await _bleService.DisconnectAsync();
+            UpdateConnectionState("Disconnected");
         }
         catch (Exception ex)
         {
@@ -201,34 +202,39 @@ public partial class MainPage : ContentPage
         // UIスレッドで実行
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            ConnectionStatusLabel.Text = state;
-
-            switch (state)
-            {
-                case "Connected":
-                    ConnectionStatusLabel.TextColor = Colors.Orange;
-                    break;
-                case "Ready":
-                    ConnectionStatusLabel.TextColor = Colors.Green;
-                    SendButton.IsEnabled = true;
-                    RealtimeStateSend.IsEnabled = true;
-                    DisconnectButton.IsVisible = true;
-                    DevicesCollectionView.IsVisible = false;
-                    DevicesLabel.IsVisible = false;
-                    ScanButton.IsVisible = false;
-                    AutoConnectButton.IsVisible = false;
-                    ReceivedMessagesLabel.Text += $"{DateTime.Now:HH:mm:ss}: Connected and ready\n";
-                    break;
-                case "Disconnected":
-                    ConnectionStatusLabel.TextColor = Colors.Red;
-                    SendButton.IsEnabled = false;
-                    RealtimeStateSend.IsEnabled = false;
-                    DisconnectButton.IsVisible = false;
-                    ScanButton.IsVisible = true;
-                    AutoConnectButton.IsVisible = true;
-                    break;
-            }
+            UpdateConnectionState(state);
         });
+    }
+
+    private void UpdateConnectionState(string state)
+    {
+        ConnectionStatusLabel.Text = state;
+
+        switch (state)
+        {
+            case "Connected":
+                ConnectionStatusLabel.TextColor = Colors.Orange;
+                break;
+            case "Ready":
+                ConnectionStatusLabel.TextColor = Colors.Green;
+                SendButton.IsEnabled = true;
+                RealtimeStateSend.IsEnabled = true;
+                DisconnectButton.IsVisible = true;
+                DevicesCollectionView.IsVisible = false;
+                DevicesLabel.IsVisible = false;
+                ScanButton.IsVisible = false;
+                AutoConnectButton.IsVisible = false;
+                ReceivedMessagesLabel.Text += $"{DateTime.Now:HH:mm:ss}: Connected and ready\n";
+                break;
+            case "Disconnected":
+                ConnectionStatusLabel.TextColor = Colors.Red;
+                SendButton.IsEnabled = false;
+                RealtimeStateSend.IsEnabled = false;
+                DisconnectButton.IsVisible = false;
+                ScanButton.IsVisible = true;
+                AutoConnectButton.IsVisible = true;
+                break;
+        }
     }
 
     private void RealtimeStateSend_Pressed(object sender, EventArgs e)
@@ -239,5 +245,10 @@ public partial class MainPage : ContentPage
     private void RealtimeStateSend_Released(object sender, EventArgs e)
     {
         _bleService.WriteByteAsync([0xFF, 0x81]);
+    }
+
+    private async void ContentPage_Disappearing(object sender, EventArgs e)
+    {
+        await _bleService.DisconnectAsync();
     }
 }

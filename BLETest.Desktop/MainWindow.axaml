@@ -6,6 +6,7 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="BLETest.Desktop.MainWindow"
         Initialized="Window_Initialized"
+        Closing="Window_Closing"
         Title="BLETest.Desktop">
 <Grid>
     <ui:TaskDialog

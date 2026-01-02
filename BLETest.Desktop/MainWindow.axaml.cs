@@ -17,6 +17,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        AddDevice.Closing += (_, _) => RegisteredDeviceManager.Default.DisposeNew();
     }
 
     public async Task BleMain()
@@ -80,18 +81,24 @@ public partial class MainWindow : Window
 
     private async void NewDeviceMenu_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
+        var device = RegisteredDeviceManager.Default.CreateNew();
         using var qrGenerator = new QRCoder.QRCodeGenerator();
-        var qrCodeData = qrGenerator.CreateQrCode($"TEST_DEVICE_ID,TEST_PUBLIC_KEY", QRCoder.QRCodeGenerator.ECCLevel.Q);
+        var qrCodeData = qrGenerator.CreateQrCode($"{device.DeviceId},{device.PubKey}", QRCoder.QRCodeGenerator.ECCLevel.Q);
         var qrCode = new QRCoder.PngByteQRCode(qrCodeData);
 
         using var ms = new System.IO.MemoryStream(qrCode.GetGraphic(20));
         QRImage.Source = new Bitmap(ms);
         await AddDevice.ShowAsync();
-        
+
     }
 
     private async void Window_Initialized(object? sender, System.EventArgs e)
     {
         await BleMain();
+    }
+
+    private void Window_Closing(object? sender, WindowClosingEventArgs e)
+    {
+        _bleCommunicationServer?.Stop();
     }
 }

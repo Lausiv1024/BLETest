@@ -20,6 +20,12 @@ public class BLECommunicationServer
     public string ParamName { get; }
     private GattLocalCharacteristic writeCharacteristic;
     private GattLocalCharacteristic notifyCharacteristic;
+
+    private GattLocalCharacteristic authenticationCharacteristicRead;
+    private GattLocalCharacteristic authenticationCharacteristicWrite;
+
+    private GattServiceProvider gattServiceProvider;
+
     public delegate void OnDataReceivedEventHandler(object sender, OnDataReceivedEventArgs e);
     public event OnDataReceivedEventHandler OnDataReceived;
 
@@ -51,12 +57,12 @@ public class BLECommunicationServer
             return;
         }
         var gattSvcProvider = gattSvcProviderRes.ServiceProvider;
+        gattServiceProvider = gattSvcProvider;
 
         // Write用キャラクタリスティック（Read/Write/WriteWithoutResponse）
         var writeParam = new GattLocalCharacteristicParameters
         {
-            CharacteristicProperties = GattCharacteristicProperties.Read
-                | GattCharacteristicProperties.Write
+            CharacteristicProperties = GattCharacteristicProperties.Write
                 | GattCharacteristicProperties.WriteWithoutResponse,
             WriteProtectionLevel = GattProtectionLevel.Plain,
             ReadProtectionLevel = GattProtectionLevel.Plain
@@ -118,18 +124,45 @@ public class BLECommunicationServer
             deferral.Complete();
         };
 
+        var authParamRead = new GattLocalCharacteristicParameters
+        {
+            CharacteristicProperties = GattCharacteristicProperties.Read,
+            ReadProtectionLevel = GattProtectionLevel.Plain
+        };
+        var authParamWrite = new GattLocalCharacteristicParameters
+        {
+            CharacteristicProperties = GattCharacteristicProperties.Write
+                | GattCharacteristicProperties.Read,
+            WriteProtectionLevel = GattProtectionLevel.Plain
+        };
+
+        var authReadResult =
+            await gattServiceProvider.Service.CreateCharacteristicAsync(BLESettings.AuthCharacteristicRead, authParamRead);
+        authenticationCharacteristicRead = authReadResult.Characteristic;
+
+
+        var authWriteResult =
+            await gattServiceProvider.Service.CreateCharacteristicAsync(BLESettings.AuthCharacteristicWrite, authParamWrite);
+        authenticationCharacteristicWrite = authWriteResult.Characteristic;
+
         GattServiceProviderAdvertisingParameters advertisingParameters = new GattServiceProviderAdvertisingParameters
         {
             IsDiscoverable = true,
             IsConnectable = true
         };
         gattSvcProvider.StartAdvertising(advertisingParameters);
+        
         await Task.Delay(int.MaxValue);
     }
 
     public async Task NotifyAsync(byte[] data)
     {
         await notifyCharacteristic?.NotifyValueAsync(data.AsBuffer());
+    }
+
+    public void Stop()
+    {
+        gattServiceProvider?.StopAdvertising();
     }
 }
 
