@@ -1,7 +1,7 @@
-﻿using Android.App;
+using Android.App;
 using Android.Runtime;
 
-namespace BLETest.GattClientNative
+namespace BLETest.GattClientNative.Platforms.Android
 {
     [Application]
     public class MainApplication : MauiApplication

@@ -1,6 +1,6 @@
-﻿using Foundation;
+using Foundation;
 
-namespace GattClient
+namespace GattClient.Platforms.iOS
 {
     [Register("AppDelegate")]
     public class AppDelegate : MauiUIApplicationDelegate

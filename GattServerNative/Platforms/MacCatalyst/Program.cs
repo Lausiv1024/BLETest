@@ -1,7 +1,7 @@
-﻿using ObjCRuntime;
+using ObjCRuntime;
 using UIKit;
 
-namespace GattServerNative
+namespace GattServerNative.Platforms.MacCatalyst
 {
     public class Program
     {

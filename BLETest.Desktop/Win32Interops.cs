@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 
-namespace BLETest;
+namespace BLETest.Desktop;
 
 internal class Win32Interops
 {

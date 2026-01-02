@@ -13,13 +13,16 @@
   <Project Path="BLETest.Desktop/BLETest.Desktop.csproj" Id="37a51f18-8208-4c01-ba35-612da7a0fbbe">
     <Platform Solution="Debug|x64" Project="x64" />
   </Project>
-  <Project Path="BLETest.GattClientNative/BLETest.GattClientNative.csproj" />
-  <Project Path="BLETest.Settings/BLETest.Settings.csproj" />
+  <Project Path="BLETest.GattClientNative/BLETest.GattClientNative.csproj">
+    <Deploy Solution="Debug|x64" />
+  </Project>
+  <Project Path="BLETest.Settings/BLETest.Common.csproj" />
   <Project Path="BLETest/BLETest.csproj" Id="11fb533e-bb06-4167-bac4-70f937c4658d" />
   <Project Path="GattClient/GattClient.csproj">
     <Deploy Solution="Debug|Any CPU" />
   </Project>
   <Project Path="GattServerNative/GattServerNative.csproj">
     <Deploy Solution="Debug|Any CPU" />
+    <Deploy Solution="Debug|x64" />
   </Project>
 </Solution>

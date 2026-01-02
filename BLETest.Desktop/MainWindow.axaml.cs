@@ -3,8 +3,8 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using FluentAvalonia.UI.Controls;
 using System.Threading.Tasks;
-using BLETest.Settings;
 using Avalonia.Threading;
+using BLETest.Common;
 
 namespace BLETest.Desktop;
 

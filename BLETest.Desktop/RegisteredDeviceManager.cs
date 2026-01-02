@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
-using BLETest.Settings;
+using BLETest.Common;
 using Windows.ApplicationModel.VoiceCommands;
-namespace BLETest;
+namespace BLETest.Desktop;
 
 internal class RegisteredDeviceManager
 {

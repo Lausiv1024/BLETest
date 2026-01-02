@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace BLETest;
+namespace BLETest.Desktop;
 
 internal class KeyControl
 {

@@ -1,6 +1,6 @@
-﻿using Foundation;
+using Foundation;
 
-namespace GattServerNative
+namespace GattServerNative.Platforms.iOS
 {
     [Register("AppDelegate")]
     public class AppDelegate : MauiUIApplicationDelegate

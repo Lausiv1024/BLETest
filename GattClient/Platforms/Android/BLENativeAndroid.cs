@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
@@ -12,7 +12,7 @@ using Android.OS;
 using Android.Runtime;
 using Plugin.BLE.Android.CallbackEventArgs;
 
-namespace GattClient
+namespace GattClient.Platforms.Android
 {
     public class BLENativeAndroid
     {

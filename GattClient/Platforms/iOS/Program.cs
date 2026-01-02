@@ -1,7 +1,7 @@
-﻿using ObjCRuntime;
+using ObjCRuntime;
 using UIKit;
 
-namespace GattClient
+namespace GattClient.Platforms.iOS
 {
     public class Program
     {

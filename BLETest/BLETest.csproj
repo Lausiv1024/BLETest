@@ -114,9 +114,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BLETest.Settings\BLETest.Settings.csproj">
-      <Project>{95080d09-c096-4114-8900-d4409b73ea1f}</Project>
-      <Name>BLETest.Settings</Name>
+    <ProjectReference Include="..\BLETest.Settings\BLETest.Common.csproj">
+      <Project>{63787B59-7DA2-B869-D88A-058A97AD4E0C}</Project>
+      <Name>BLETest.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

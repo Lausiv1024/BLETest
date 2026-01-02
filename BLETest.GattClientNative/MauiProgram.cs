@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using BLETest.GattClientNative.Services;
-using BLETest.Settings;
+using BLETest.Common;
 
 namespace BLETest.GattClientNative
 {

@@ -1,6 +1,6 @@
-﻿using Foundation;
+using Foundation;
 
-namespace BLETest.GattClientNative
+namespace BLETest.GattClientNative.Platforms.iOS
 {
     [Register("AppDelegate")]
     public class AppDelegate : MauiUIApplicationDelegate

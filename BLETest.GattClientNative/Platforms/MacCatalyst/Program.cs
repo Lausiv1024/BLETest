@@ -1,7 +1,7 @@
-﻿using ObjCRuntime;
+using ObjCRuntime;
 using UIKit;
 
-namespace BLETest.GattClientNative
+namespace BLETest.GattClientNative.Platforms.MacCatalyst
 {
     public class Program
     {

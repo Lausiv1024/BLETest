@@ -1,4 +1,3 @@
-using BLETest.Settings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +7,8 @@ using System.Threading.Tasks;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using System.Diagnostics;
 using Windows.Storage.Streams;
-namespace BLETest;
+using BLETest.Common;
+namespace BLETest.Desktop;
 
 public class BLECommunicationServer
 {

@@ -1,4 +1,4 @@
-﻿using BLETest.Settings;
+using BLETest.Common;
 using Plugin.BLE;
 using Plugin.BLE.Abstractions.Contracts;
 using System.Text;

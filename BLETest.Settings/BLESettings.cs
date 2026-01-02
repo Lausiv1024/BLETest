@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace BLETest.Settings
+namespace BLETest.Common
 {
     public class BLESettings
     {

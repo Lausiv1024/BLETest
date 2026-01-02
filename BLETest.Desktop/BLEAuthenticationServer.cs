@@ -1,4 +1,4 @@
-using BLETest.Settings;
+using BLETest.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +8,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 
-namespace BLETest;
+namespace BLETest.Desktop;
 
 internal class BLEAuthenticationServer
 {

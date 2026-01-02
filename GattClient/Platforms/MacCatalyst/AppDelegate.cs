@@ -1,6 +1,6 @@
-﻿using Foundation;
+using Foundation;
 
-namespace GattClient
+namespace GattClient.Platforms.MacCatalyst
 {
     [Register("AppDelegate")]
     public class AppDelegate : MauiUIApplicationDelegate

@@ -25,6 +25,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BLETest.Settings\BLETest.Settings.csproj" />
+    <ProjectReference Include="..\BLETest.Settings\BLETest.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Cipher\" />
   </ItemGroup>
 </Project>

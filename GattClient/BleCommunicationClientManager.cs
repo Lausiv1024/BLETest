@@ -1,4 +1,3 @@
-﻿using BLETest.Settings;
 using Plugin.BLE.Abstractions;
 using Plugin.BLE.Abstractions.Contracts;
 using Plugin.BLE.Abstractions.Exceptions;
