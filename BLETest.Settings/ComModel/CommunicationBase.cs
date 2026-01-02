@@ -4,7 +4,7 @@ using System.Text;
 using MessagePack;
 namespace BLETest.Common.ComModel
 {
-    internal class CommunicationBase
+    public class CommunicationBase
     {
         [Key(0)]
         public int Id { get; }

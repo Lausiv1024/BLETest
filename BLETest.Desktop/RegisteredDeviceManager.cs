@@ -44,6 +44,14 @@ internal class RegisteredDeviceManager
     {
         NewDevice = null;
     }
+
+    public void SaveNew(string devicePubKey)
+    {
+        if (NewDevice == null) return;
+        NewDevice.PubKey = devicePubKey;
+        registeredDevices.Add(NewDevice);
+        NewDevice = null;
+    }
 }
 
 public class  RegisteredDevice

@@ -8,6 +8,9 @@ using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using System.Diagnostics;
 using Windows.Storage.Streams;
 using BLETest.Common;
+using BLETest.Common.ComModel;
+using MessagePack;
+using Org.BouncyCastle.Security;
 namespace BLETest.Desktop;
 
 public class BLECommunicationServer
@@ -140,10 +143,12 @@ public class BLECommunicationServer
             await gattServiceProvider.Service.CreateCharacteristicAsync(BLESettings.AuthCharacteristicRead, authParamRead);
         authenticationCharacteristicRead = authReadResult.Characteristic;
 
+        authenticationCharacteristicRead.ReadRequested += AuthenticationCharacteristicRead_ReadRequested;
 
         var authWriteResult =
             await gattServiceProvider.Service.CreateCharacteristicAsync(BLESettings.AuthCharacteristicWrite, authParamWrite);
         authenticationCharacteristicWrite = authWriteResult.Characteristic;
+        authenticationCharacteristicWrite.WriteRequested += AuthenticationCharacteristicWrite_WriteRequested;
 
         GattServiceProviderAdvertisingParameters advertisingParameters = new GattServiceProviderAdvertisingParameters
         {
@@ -153,6 +158,42 @@ public class BLECommunicationServer
         gattSvcProvider.StartAdvertising(advertisingParameters);
         
         await Task.Delay(int.MaxValue);
+    }
+
+    private async void AuthenticationCharacteristicWrite_WriteRequested(GattLocalCharacteristic sender, GattWriteRequestedEventArgs args)
+    {
+        var deferral = args.GetDeferral();
+        var request = await args.GetRequestAsync();
+        var b = request.Value.ToArray();
+
+        var deviceNew = MessagePackSerializer.Deserialize<DeviceNewData>(b);
+
+        var signer = SignerUtilities.GetSigner(Constants.ECDH_CURVE_ALGORITHM);
+        signer.Init(false,CryptoUtil.ByteToPubKey( deviceNew.MPubKey));
+        var deviceIdBytes = deviceNew.DeviceId.ToByteArray();
+        signer.BlockUpdate(deviceIdBytes, 0,  deviceIdBytes.Length);
+        var isValid = signer.VerifySignature(deviceNew.DeviceIdSig);
+
+        if (!isValid)
+        {
+            Console.WriteLine("Invalid device authentication signature");
+            deferral.Complete();
+            return;
+        }
+
+        RegisteredDeviceManager.Default.SaveNew(Convert.ToBase64String(deviceNew.MPubKey));
+
+        Console.WriteLine("Device authenticated: " + deviceNew.DeviceId);
+
+        deferral.Complete();
+    }
+
+    private async void AuthenticationCharacteristicRead_ReadRequested(GattLocalCharacteristic sender, GattReadRequestedEventArgs args)
+    {
+        var deferral = args.GetDeferral();
+        var request = await args.GetRequestAsync();
+        deferral.Complete();
+        //throw new NotImplementedException();
     }
 
     public async Task NotifyAsync(byte[] data)
