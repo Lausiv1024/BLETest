@@ -10,6 +10,30 @@
             Padding="20"
             Spacing="15">
 
+            <!-- 認証状態表示 -->
+            <Frame
+                x:Name="AuthStatusFrame"
+                BackgroundColor="#FFF3CD"
+                BorderColor="#FFC107"
+                Padding="10"
+                CornerRadius="5">
+                <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                    <Label
+                        x:Name="AuthStatusLabel"
+                        Text="未登録"
+                        FontSize="14"
+                        VerticalOptions="Center" />
+                    <Button
+                        x:Name="ScanQRButton"
+                        Text="QRスキャン"
+                        Clicked="OnScanQRButtonClicked"
+                        BackgroundColor="#007BFF"
+                        TextColor="White"
+                        HeightRequest="35"
+                        Padding="10,0" />
+                </HorizontalStackLayout>
+            </Frame>
+
             <!-- 接続状態表示 -->
             <Label
                 x:Name="ConnectionStatusLabel"

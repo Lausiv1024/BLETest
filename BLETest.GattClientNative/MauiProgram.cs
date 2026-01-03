@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using BLETest.GattClientNative.Services;
 using BLETest.Common;
+using ZXing.Net.Maui.Controls;
 
 namespace BLETest.GattClientNative
 {
@@ -11,6 +12,7 @@ namespace BLETest.GattClientNative
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UseBarcodeReader()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -27,10 +29,14 @@ namespace BLETest.GattClientNative
                 new Platforms.Android.BleService(
                     BLESettings.ServiceId,
                     BLESettings.WriteCharacteristic,
-                    BLESettings.NotifyCharacteristic));
+                    BLESettings.NotifyCharacteristic,
+                    BLESettings.AuthCharacteristicWrite));
 #endif
 
+            // 認証サービスを登録
+            builder.Services.AddSingleton<IAuthenticationService, AuthenticationService>();
             builder.Services.AddSingleton<MainPage>();
+            builder.Services.AddTransient<QRScanPage>();
 
             return builder.Build();
         }

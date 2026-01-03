@@ -13,7 +13,7 @@ public partial class MainWindow : Window
     public byte cnt = 0;
     public const int BufferSize = 1024;
     BLECommunicationServer? _bleCommunicationServer;
-    BleSecurityManager _bleSecurityManager = new BleSecurityManager();
+    //BleSecurityManager _bleSecurityManager = new BleSecurityManager();
 
     public MainWindow()
     {

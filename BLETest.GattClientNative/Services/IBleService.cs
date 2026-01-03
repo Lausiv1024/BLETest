@@ -4,6 +4,7 @@ namespace BLETest.GattClientNative.Services
     {
         event EventHandler<string>? MessageReceived;
         event EventHandler<string>? ConnectionStateChanged;
+        event EventHandler<bool>? AuthenticationCompleted;
         bool IsConnected { get; }
 
         Task InitializeAsync();
@@ -13,6 +14,7 @@ namespace BLETest.GattClientNative.Services
         Task DisconnectAsync();
         Task<bool> WriteTextAsync(string text);
         Task<bool> WriteByteAsync(byte[] data);
+        Task<bool> WriteAuthenticationDataAsync(byte[] data);
     }
 
     public class BleDeviceInfo

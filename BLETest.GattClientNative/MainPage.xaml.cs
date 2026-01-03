@@ -5,18 +5,25 @@ namespace BLETest.GattClientNative;
 public partial class MainPage : ContentPage
 {
     private readonly IBleService _bleService;
+    private readonly IAuthenticationService _authService;
+    private readonly IServiceProvider _serviceProvider;
     DateTime sentTime = DateTime.MinValue;
-    public MainPage(IBleService bleService)
+
+    public MainPage(IBleService bleService, IAuthenticationService authService, IServiceProvider serviceProvider)
     {
         InitializeComponent();
         _bleService = bleService;
+        _authService = authService;
+        _serviceProvider = serviceProvider;
 
         // イベントハンドラーを登録
         _bleService.MessageReceived += OnMessageReceived;
         _bleService.ConnectionStateChanged += OnConnectionStateChanged;
+        _bleService.AuthenticationCompleted += OnAuthenticationCompleted;
 
         // 初期化
         InitializeBleAsync();
+        UpdateAuthStatus();
     }
 
     private async void InitializeBleAsync()
@@ -206,7 +213,7 @@ public partial class MainPage : ContentPage
         });
     }
 
-    private void UpdateConnectionState(string state)
+    private async void UpdateConnectionState(string state)
     {
         ConnectionStatusLabel.Text = state;
 
@@ -225,6 +232,14 @@ public partial class MainPage : ContentPage
                 ScanButton.IsVisible = false;
                 AutoConnectButton.IsVisible = false;
                 ReceivedMessagesLabel.Text += $"{DateTime.Now:HH:mm:ss}: Connected and ready\n";
+
+                // QRコードがスキャン済みで未登録の場合、自動的に認証を実行
+                if (!string.IsNullOrEmpty(_authService.ServerDeviceId) && !_authService.IsRegistered)
+                {
+                    ReceivedMessagesLabel.Text += $"{DateTime.Now:HH:mm:ss}: 認証を開始します...\n";
+                    await Task.Delay(500); // 少し待機してから認証
+                    OnRegisterDeviceButtonClicked();
+                }
                 break;
             case "Disconnected":
                 ConnectionStatusLabel.TextColor = Colors.Red;
@@ -250,5 +265,115 @@ public partial class MainPage : ContentPage
     private async void ContentPage_Disappearing(object sender, EventArgs e)
     {
         await _bleService.DisconnectAsync();
+    }
+
+    private void UpdateAuthStatus()
+    {
+        if (_authService.IsRegistered)
+        {
+            AuthStatusLabel.Text = $"登録済み: {_authService.ServerDeviceId?.Substring(0, 8)}...";
+            AuthStatusFrame.BackgroundColor = Color.FromArgb("#D4EDDA");
+            AuthStatusFrame.BorderColor = Color.FromArgb("#28A745");
+            ScanQRButton.Text = "再登録";
+        }
+        else
+        {
+            AuthStatusLabel.Text = "未登録";
+            AuthStatusFrame.BackgroundColor = Color.FromArgb("#FFF3CD");
+            AuthStatusFrame.BorderColor = Color.FromArgb("#FFC107");
+            ScanQRButton.Text = "QRスキャン";
+        }
+    }
+
+    private async void OnScanQRButtonClicked(object? sender, EventArgs e)
+    {
+        try
+        {
+            // カメラ権限をリクエスト
+            var cameraStatus = await Permissions.CheckStatusAsync<Permissions.Camera>();
+            if (cameraStatus != PermissionStatus.Granted)
+            {
+                cameraStatus = await Permissions.RequestAsync<Permissions.Camera>();
+                if (cameraStatus != PermissionStatus.Granted)
+                {
+                    await DisplayAlert("Permission Required", "Camera permission is required for QR scanning", "OK");
+                    return;
+                }
+            }
+
+            // QRスキャンページを開く
+            var qrScanPage = _serviceProvider.GetRequiredService<QRScanPage>();
+            qrScanPage.OnQRCodeScanned += async (deviceId, publicKey) =>
+            {
+                // サーバー情報を設定
+                _authService.SetServerInfo(deviceId, publicKey);
+
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    ReceivedMessagesLabel.Text += $"{DateTime.Now:HH:mm:ss}: QRコード読み取り成功 - DeviceId: {deviceId.Substring(0, 8)}...\n";
+                    UpdateAuthStatus();
+                });
+            };
+
+            await Navigation.PushAsync(qrScanPage);
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"QR scan failed: {ex.Message}", "OK");
+        }
+    }
+
+    private async void OnRegisterDeviceButtonClicked()
+    {
+        if (!_bleService.IsConnected)
+        {
+            await DisplayAlert("Error", "デバイスに接続してから認証を実行してください", "OK");
+            return;
+        }
+
+        if (string.IsNullOrEmpty(_authService.ServerDeviceId))
+        {
+            await DisplayAlert("Error", "先にQRコードをスキャンしてください", "OK");
+            return;
+        }
+
+        try
+        {
+            // 認証データを作成して送信
+            var authData = await _authService.CreateAuthenticationDataAsync();
+            var success = await _bleService.WriteAuthenticationDataAsync(authData);
+
+            if (success)
+            {
+                await _authService.SaveCredentialsAsync();
+                ReceivedMessagesLabel.Text += $"{DateTime.Now:HH:mm:ss}: 認証データ送信成功\n";
+                UpdateAuthStatus();
+            }
+            else
+            {
+                await DisplayAlert("Error", "認証データの送信に失敗しました", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Authentication failed: {ex.Message}", "OK");
+        }
+    }
+
+    private void OnAuthenticationCompleted(object? sender, bool success)
+    {
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            if (success)
+            {
+                ReceivedMessagesLabel.Text += $"{DateTime.Now:HH:mm:ss}: 認証完了\n";
+                await _authService.SaveCredentialsAsync();
+                UpdateAuthStatus();
+            }
+            else
+            {
+                ReceivedMessagesLabel.Text += $"{DateTime.Now:HH:mm:ss}: 認証失敗\n";
+            }
+        });
     }
 }

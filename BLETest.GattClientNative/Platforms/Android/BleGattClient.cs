@@ -13,22 +13,26 @@ namespace BLETest.GattClientNative.Platforms.Android
         private BluetoothGatt? _bluetoothGatt;
         private BluetoothGattCharacteristic? _writeCharacteristic;
         private BluetoothGattCharacteristic? _notifyCharacteristic;
+        private BluetoothGattCharacteristic? _authWriteCharacteristic;
         private readonly Context _context;
         private readonly Guid _serviceUuid;
         private readonly Guid _writeCharacteristicUuid;
         private readonly Guid _notifyCharacteristicUuid;
+        private readonly Guid _authCharacteristicWriteUuid;
         private GattCallback? _gattCallback;
 
         public event EventHandler<string>? MessageReceived;
         public event EventHandler<string>? ConnectionStateChanged;
+        public event EventHandler<bool>? AuthenticationCompleted;
         public bool IsConnected { get; private set; }
 
-        public BleGattClient(Context context, Guid serviceUuid, Guid writeCharacteristicUuid, Guid notifyCharacteristicUuid)
+        public BleGattClient(Context context, Guid serviceUuid, Guid writeCharacteristicUuid, Guid notifyCharacteristicUuid, Guid authCharacteristicWriteUuid)
         {
             _context = context;
             _serviceUuid = serviceUuid;
             _writeCharacteristicUuid = writeCharacteristicUuid;
             _notifyCharacteristicUuid = notifyCharacteristicUuid;
+            _authCharacteristicWriteUuid = authCharacteristicWriteUuid;
         }
 
         /// <summary>
@@ -91,6 +95,50 @@ namespace BLETest.GattClientNative.Platforms.Android
             return await WriteByteAsnyc(Encoding.UTF8.GetBytes(text));
         }
 
+        /// <summary>
+        /// 認証データを送信
+        /// </summary>
+        public async Task<bool> WriteAuthenticationDataAsync(byte[] data)
+        {
+            if (_bluetoothGatt == null || _authWriteCharacteristic == null || !IsConnected)
+            {
+                System.Diagnostics.Debug.WriteLine($"WriteAuthenticationDataAsync: Cannot write - Gatt: {_bluetoothGatt != null}, AuthChar: {_authWriteCharacteristic != null}, Connected: {IsConnected}");
+                return false;
+            }
+
+            try
+            {
+                bool result;
+                if (global::Android.OS.Build.VERSION.SdkInt >= global::Android.OS.BuildVersionCodes.Tiramisu)
+                {
+                    var writeResult = _bluetoothGatt.WriteCharacteristic(_authWriteCharacteristic, data, (int)GattWriteType.Default);
+                    result = writeResult == 0;
+                    System.Diagnostics.Debug.WriteLine($"WriteAuthenticationDataAsync result (API 33+): {writeResult}");
+                }
+                else
+                {
+#pragma warning disable CS0618
+                    _authWriteCharacteristic.SetValue(data);
+                    result = _bluetoothGatt.WriteCharacteristic(_authWriteCharacteristic);
+#pragma warning restore CS0618
+                    System.Diagnostics.Debug.WriteLine($"WriteAuthenticationDataAsync result (legacy): {result}");
+                }
+
+                if (result)
+                {
+                    AuthenticationCompleted?.Invoke(this, true);
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"WriteAuthenticationDataAsync error: {ex.Message}");
+                AuthenticationCompleted?.Invoke(this, false);
+                return false;
+            }
+        }
+
         private void OnConnectionStateChange(BluetoothGatt gatt, GattStatus status, ProfileState newState)
         {
             Console.WriteLine("Connection Status Changed   GattStatus: {0}   ProfileState:{1}", status, newState);
@@ -121,6 +169,9 @@ namespace BLETest.GattClientNative.Platforms.Android
                     // Notify用キャラクタリスティックを取得
                     _notifyCharacteristic = service.GetCharacteristic(Java.Util.UUID.FromString(_notifyCharacteristicUuid.ToString()));
 
+                    // 認証用キャラクタリスティックを取得
+                    _authWriteCharacteristic = service.GetCharacteristic(Java.Util.UUID.FromString(_authCharacteristicWriteUuid.ToString()));
+
                     if (_writeCharacteristic != null && _notifyCharacteristic != null)
                     {
                         // Notificationを有効化
@@ -150,6 +201,11 @@ namespace BLETest.GattClientNative.Platforms.Android
                     else
                     {
                         System.Diagnostics.Debug.WriteLine($"Characteristics not found - Write: {_writeCharacteristic != null}, Notify: {_notifyCharacteristic != null}");
+                    }
+
+                    if (_authWriteCharacteristic != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Auth characteristic found");
                     }
                 }
             }

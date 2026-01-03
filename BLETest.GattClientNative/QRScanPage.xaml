@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.MAUI.Controls"
+             x:Class="BLETest.GattClientNative.QRScanPage"
+             Title="QR Code Scanner">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- カメラプレビュー -->
+        <zxing:CameraBarcodeReaderView
+            x:Name="BarcodeReader"
+            Grid.Row="0"
+            IsDetecting="True"
+            BarcodesDetected="BarcodeReader_BarcodesDetected">
+        </zxing:CameraBarcodeReaderView>
+
+        <!-- スキャン枠のオーバーレイ -->
+        <Frame
+            Grid.Row="0"
+            BackgroundColor="Transparent"
+            BorderColor="White"
+            CornerRadius="10"
+            HeightRequest="250"
+            WidthRequest="250"
+            HorizontalOptions="Center"
+            VerticalOptions="Center" />
+
+        <!-- 下部のステータス表示 -->
+        <VerticalStackLayout
+            Grid.Row="1"
+            Padding="20"
+            Spacing="10"
+            BackgroundColor="#222222">
+
+            <Label
+                x:Name="StatusLabel"
+                Text="QRコードをスキャンしてください"
+                TextColor="White"
+                FontSize="16"
+                HorizontalTextAlignment="Center" />
+
+            <Button
+                x:Name="CancelButton"
+                Text="キャンセル"
+                Clicked="CancelButton_Clicked"
+                BackgroundColor="#666666"
+                TextColor="White"
+                HorizontalOptions="Fill" />
+
+        </VerticalStackLayout>
+    </Grid>
+
+</ContentPage>
