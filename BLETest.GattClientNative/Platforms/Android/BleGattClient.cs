@@ -19,6 +19,7 @@ namespace BLETest.GattClientNative.Platforms.Android
         private readonly Guid _writeCharacteristicUuid;
         private readonly Guid _notifyCharacteristicUuid;
         private readonly Guid _authCharacteristicWriteUuid;
+        private readonly Guid _authCharacteristicReadUuid;
         private GattCallback? _gattCallback;
 
         public event EventHandler<string>? MessageReceived;
@@ -26,13 +27,14 @@ namespace BLETest.GattClientNative.Platforms.Android
         public event EventHandler<bool>? AuthenticationCompleted;
         public bool IsConnected { get; private set; }
 
-        public BleGattClient(Context context, Guid serviceUuid, Guid writeCharacteristicUuid, Guid notifyCharacteristicUuid, Guid authCharacteristicWriteUuid)
+        public BleGattClient(Context context, Guid serviceUuid, Guid writeCharacteristicUuid, Guid notifyCharacteristicUuid, Guid authCharacteristicWriteUuid, Guid authCharacteristicReadUuid)
         {
             _context = context;
             _serviceUuid = serviceUuid;
             _writeCharacteristicUuid = writeCharacteristicUuid;
             _notifyCharacteristicUuid = notifyCharacteristicUuid;
             _authCharacteristicWriteUuid = authCharacteristicWriteUuid;
+            _authCharacteristicReadUuid = authCharacteristicReadUuid;
         }
 
         /// <summary>

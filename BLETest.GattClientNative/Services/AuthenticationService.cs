@@ -54,7 +54,7 @@ namespace BLETest.GattClientNative.Services
             {
                 DeviceId = deviceIdGuid,
                 MPubKey = clientPublicKey,
-                DeviceIdSig = signature
+                DeviceIdSig = signature, Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(), Id = 0
             };
 
             // MessagePackでシリアライズ
@@ -64,7 +64,8 @@ namespace BLETest.GattClientNative.Services
 
         private byte[] SignData(AsymmetricKeyParameter privateKey, byte[] data)
         {
-            var signer = SignerUtilities.GetSigner("SHA256withECDSA");
+            //var signer = SignerUtilities.GetSigner("SHA256withECDSA");
+            var signer = SignerUtilities.GetSigner(Constants.ECDH_CURVE_ALGORITHM);
             signer.Init(true, privateKey);
             signer.BlockUpdate(data, 0, data.Length);
             return signer.GenerateSignature();
@@ -88,7 +89,6 @@ namespace BLETest.GattClientNative.Services
                 await SecureStorage.SetAsync(ClientPriKeyKey, Convert.ToBase64String(clientPriKey));
                 await SecureStorage.SetAsync(ClientPubKeyKey, Convert.ToBase64String(clientPubKey));
 
-                IsRegistered = true;
                 return true;
             }
             catch (Exception ex)

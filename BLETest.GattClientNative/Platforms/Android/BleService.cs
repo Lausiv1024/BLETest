@@ -4,13 +4,14 @@ using BLETest.GattClientNative.Services;
 
 namespace BLETest.GattClientNative.Platforms.Android
 {
-    public class BleService : IBleService
+    public class BleService(Guid serviceUuid, Guid writeCharacteristicUuid, Guid notifyCharacteristicUuid, Guid authCharacteristicWriteUuid, Guid authCharacteristicReadUuid) : IBleService
     {
-        private readonly Context _context;
-        private readonly Guid _serviceUuid;
-        private readonly Guid _writeCharacteristicUuid;
-        private readonly Guid _notifyCharacteristicUuid;
-        private readonly Guid _authCharacteristicWriteUuid;
+        private readonly Context _context = global::Android.App.Application.Context;
+        private readonly Guid _serviceUuid = serviceUuid;
+        private readonly Guid _writeCharacteristicUuid = writeCharacteristicUuid;
+        private readonly Guid _notifyCharacteristicUuid = notifyCharacteristicUuid;
+        private readonly Guid _authCharacteristicWriteUuid = authCharacteristicWriteUuid;
+        private readonly Guid _authCharacteristicReadUuid = authCharacteristicReadUuid;
         private BluetoothAdapter? _bluetoothAdapter;
         private BleScanner? _scanner;
         private BleGattClient? _gattClient;
@@ -19,15 +20,6 @@ namespace BLETest.GattClientNative.Platforms.Android
         public event EventHandler<string>? ConnectionStateChanged;
         public event EventHandler<bool>? AuthenticationCompleted;
         public bool IsConnected => _gattClient?.IsConnected ?? false;
-
-        public BleService(Guid serviceUuid, Guid writeCharacteristicUuid, Guid notifyCharacteristicUuid, Guid authCharacteristicWriteUuid)
-        {
-            _context = global::Android.App.Application.Context;
-            _serviceUuid = serviceUuid;
-            _writeCharacteristicUuid = writeCharacteristicUuid;
-            _notifyCharacteristicUuid = notifyCharacteristicUuid;
-            _authCharacteristicWriteUuid = authCharacteristicWriteUuid;
-        }
 
         public Task InitializeAsync()
         {
@@ -118,7 +110,7 @@ namespace BLETest.GattClientNative.Platforms.Android
                 return Task.FromResult(false);
             }
 
-            _gattClient = new BleGattClient(_context, _serviceUuid, _writeCharacteristicUuid, _notifyCharacteristicUuid, _authCharacteristicWriteUuid);
+            _gattClient = new BleGattClient(_context, _serviceUuid, _writeCharacteristicUuid, _notifyCharacteristicUuid, _authCharacteristicWriteUuid, _authCharacteristicReadUuid);
             _gattClient.MessageReceived += (s, e) => MessageReceived?.Invoke(this, e);
             _gattClient.ConnectionStateChanged += (s, e) => ConnectionStateChanged?.Invoke(this, e);
             _gattClient.AuthenticationCompleted += (s, e) => AuthenticationCompleted?.Invoke(this, e);

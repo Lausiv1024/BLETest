@@ -5,13 +5,14 @@ using System.Text;
 
 namespace BLETest.Common.ComModel
 {
+    [MessagePackObject]
     public class DeviceNewData : CommunicationBase
     {
-        [Key(3)]
+        [Key(2)]
         public Guid DeviceId { get; set; }
-        [Key(4)]
+        [Key(3)]
         public byte[] MPubKey { get; set; } //クライアントからのデータを検証するための署名検証用公開鍵
-        [Key(5)]
+        [Key(4)]
         public byte[] DeviceIdSig { get; set; } //DeviceIdに対する署名
     }
 }

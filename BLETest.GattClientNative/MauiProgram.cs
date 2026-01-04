@@ -30,7 +30,8 @@ namespace BLETest.GattClientNative
                     BLESettings.ServiceId,
                     BLESettings.WriteCharacteristic,
                     BLESettings.NotifyCharacteristic,
-                    BLESettings.AuthCharacteristicWrite));
+                    BLESettings.AuthCharacteristicWrite,
+                    BLESettings.AuthCharacteristicRead));
 #endif
 
             // 認証サービスを登録

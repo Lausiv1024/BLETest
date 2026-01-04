@@ -30,7 +30,15 @@ public class BLECommunicationServer
     private GattServiceProvider gattServiceProvider;
 
     public delegate void OnDataReceivedEventHandler(object sender, OnDataReceivedEventArgs e);
-    public event OnDataReceivedEventHandler OnDataReceived;
+    public event OnDataReceivedEventHandler? OnDataReceived;
+
+    public delegate void OnDebugMessageEventHandler(object sender, OnDebugMessageEventArgs e);
+    public event OnDebugMessageEventHandler? OnDebugMessage;
+
+    public delegate void AuthenticationResultEventHandler(object sender, AuthenticationResultEventArgs e);
+    public event AuthenticationResultEventHandler? OnAuthenticationResult;
+
+    private CommunicationBase? AuthNextRead;
 
     /// <summary>
     /// Write用とNotify用のキャラクタリスティックを分けてBLE通信を行う
@@ -51,6 +59,11 @@ public class BLECommunicationServer
         : this(ServiceId, ParamId, ParamId, paramName)
     {
     }
+
+    /// <summary>
+    /// BLEの初期化とアドバタイズ開始
+    /// </summary>
+    /// <returns></returns>
     public async Task BLEInitializeAsync()
     {
         var gattSvcProviderRes = await GattServiceProvider.CreateAsync(ServiceId);
@@ -167,16 +180,21 @@ public class BLECommunicationServer
         var b = request.Value.ToArray();
 
         var deviceNew = MessagePackSerializer.Deserialize<DeviceNewData>(b);
-
+        // Signature検証
         var signer = SignerUtilities.GetSigner(Constants.ECDH_CURVE_ALGORITHM);
-        signer.Init(false,CryptoUtil.ByteToPubKey( deviceNew.MPubKey));
+        signer.Init(false,CryptoUtil.ByteToPubKey( deviceNew.MPubKey)); //signerを検証モードとして初期化します
         var deviceIdBytes = deviceNew.DeviceId.ToByteArray();
         signer.BlockUpdate(deviceIdBytes, 0,  deviceIdBytes.Length);
         var isValid = signer.VerifySignature(deviceNew.DeviceIdSig);
-
+        if (request.Option == GattWriteOption.WriteWithResponse)
+        {
+            request.Respond();
+        }
         if (!isValid)
         {
             Console.WriteLine("Invalid device authentication signature");
+            //PostDebugMessage("Invalid device authentication signature");
+            SendAuthenticationResult(false, "Invalid device authentication signature", request);
             deferral.Complete();
             return;
         }
@@ -184,14 +202,40 @@ public class BLECommunicationServer
         RegisteredDeviceManager.Default.SaveNew(Convert.ToBase64String(deviceNew.MPubKey));
 
         Console.WriteLine("Device authenticated: " + deviceNew.DeviceId);
+        //PostDebugMessage("Device authenticated: " + deviceNew.DeviceId);
+        SendAuthenticationResult(true, "Device authenticated", request);
 
         deferral.Complete();
+    }
+
+    private void SendAuthenticationResult(bool isSuccess, string message, GattWriteRequest req)
+    {
+        OnAuthenticationResult?.Invoke(this, new AuthenticationResultEventArgs(isSuccess, message));
+
+        AuthNextRead = new DeviceNewResult
+        {
+            IsSuccess = isSuccess,
+            Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),Id=1
+        };
     }
 
     private async void AuthenticationCharacteristicRead_ReadRequested(GattLocalCharacteristic sender, GattReadRequestedEventArgs args)
     {
         var deferral = args.GetDeferral();
         var request = await args.GetRequestAsync();
+        Console.WriteLine("AuthenticationCharacteristic ReadRequested");
+        // Respond with the next AuthNextRead data if available
+        if (AuthNextRead != null)
+        {
+            var bytes = MessagePackSerializer.Serialize(AuthNextRead);
+            request.RespondWithValue(bytes.AsBuffer());
+            AuthNextRead = null;
+        }
+        else
+        {
+            byte[] buf = new byte[] { 0x30 };
+            request.RespondWithValue(buf.AsBuffer());
+        }
         deferral.Complete();
         //throw new NotImplementedException();
     }
@@ -205,6 +249,11 @@ public class BLECommunicationServer
     {
         gattServiceProvider?.StopAdvertising();
     }
+
+    public void PostDebugMessage(string message)
+    {
+        OnDebugMessage?.Invoke(this, new OnDebugMessageEventArgs(message));
+    }
 }
 
 public class OnDataReceivedEventArgs : EventArgs
@@ -215,5 +264,24 @@ public class OnDataReceivedEventArgs : EventArgs
     {
         Data = data;
         DeviceId = deviceId;
+    }
+}
+
+public class OnDebugMessageEventArgs : EventArgs
+{
+    public string Message { get; }
+    public OnDebugMessageEventArgs(string message)
+    {
+        Message = message;
+    }
+}
+public class AuthenticationResultEventArgs : EventArgs
+{
+    public bool IsSuccess { get; }
+    public string Message { get; }
+    public AuthenticationResultEventArgs(bool isSuccess, string message)
+    {
+        IsSuccess = isSuccess;
+        Message = message;
     }
 }

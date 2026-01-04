@@ -6,6 +6,6 @@ namespace BLETest.Common
 {
     public class Constants
     {
-        public const string ECDH_CURVE_ALGORITHM = "secp256r1";
+        public const string ECDH_CURVE_ALGORITHM = "SHA256withECDSA";
     }
 }

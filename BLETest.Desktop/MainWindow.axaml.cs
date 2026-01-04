@@ -5,6 +5,7 @@ using FluentAvalonia.UI.Controls;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using BLETest.Common;
+using Windows.Devices.SmartCards;
 
 namespace BLETest.Desktop;
 
@@ -18,7 +19,6 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        AddDevice.Closing += (_, _) => RegisteredDeviceManager.Default.DisposeNew();
     }
 
     public async Task BleMain()
@@ -29,6 +29,16 @@ public partial class MainWindow : Window
             BLESettings.NotifyCharacteristic,
             "BLETest");
         _bleCommunicationServer.OnDataReceived += OndataReceived;
+        _bleCommunicationServer.OnDebugMessage += (s, e) =>
+        {
+            Dispatcher.UIThread.Post(() => ReceivedVal.Text += $"[Debug] : {e.Message}\n");
+        };
+        _bleCommunicationServer.OnAuthenticationResult += (s, e) =>
+        {
+            Dispatcher.UIThread.Post(() => ReceivedVal.Text += $"[Auth] : {(e.IsSuccess ? "Success" : "Failure")} - {e.Message}\n");
+            if (e.IsSuccess)
+                Dispatcher.UIThread.Post(() => AddDevice.Hide(TaskDialogStandardResult.OK));
+        };
         await _bleCommunicationServer.BLEInitializeAsync();
     }
 
@@ -89,8 +99,7 @@ public partial class MainWindow : Window
 
         using var ms = new System.IO.MemoryStream(qrCode.GetGraphic(20));
         QRImage.Source = new Bitmap(ms);
-        await AddDevice.ShowAsync();
-
+        var result = await AddDevice.ShowAsync(true);
     }
 
     private async void Window_Initialized(object? sender, System.EventArgs e)

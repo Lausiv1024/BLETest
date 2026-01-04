@@ -305,6 +305,7 @@ public partial class MainPage : ContentPage
             var qrScanPage = _serviceProvider.GetRequiredService<QRScanPage>();
             qrScanPage.OnQRCodeScanned += async (deviceId, publicKey) =>
             {
+                await _authService.ClearCredentialsAsync();
                 // サーバー情報を設定
                 _authService.SetServerInfo(deviceId, publicKey);
 
@@ -354,7 +355,7 @@ public partial class MainPage : ContentPage
                 await DisplayAlert("Error", "認証データの送信に失敗しました", "OK");
             }
         }
-        catch (Exception ex)
+        catch (FileNotFoundException ex)
         {
             await DisplayAlert("Error", $"Authentication failed: {ex.Message}", "OK");
         }
