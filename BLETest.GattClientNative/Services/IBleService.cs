@@ -15,6 +15,7 @@ namespace BLETest.GattClientNative.Services
         Task<bool> WriteTextAsync(string text);
         Task<bool> WriteByteAsync(byte[] data);
         Task<bool> WriteAuthenticationDataAsync(byte[] data);
+        Task<byte[]> ReadAuthenticationDataAsync();
     }
 
     public class BleDeviceInfo

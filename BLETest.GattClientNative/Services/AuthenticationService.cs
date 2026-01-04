@@ -148,5 +148,19 @@ namespace BLETest.GattClientNative.Services
 
             return Task.CompletedTask;
         }
+
+        public async Task<bool> VerifyServerAsync(byte[] data)
+        {
+            if (ServerPublicKey == null)
+            {
+                return false;
+            }
+            var d = MessagePackSerializer.Deserialize<ServerVerifyData>(data);
+            var signer = SignerUtilities.GetSigner(Constants.ECDH_CURVE_ALGORITHM);
+            signer.Init(false, CryptoUtil.ByteToPubKey(ServerPublicKey!));
+            var deviceIdBytes = d.ServerId.ToByteArray();
+            signer.BlockUpdate(deviceIdBytes, 0, deviceIdBytes.Length);
+            return signer.VerifySignature(d.ServerIdSignature);
+        }
     }
 }

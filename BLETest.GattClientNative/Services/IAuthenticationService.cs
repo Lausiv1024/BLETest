@@ -8,6 +8,7 @@ namespace BLETest.GattClientNative.Services
 
         void SetServerInfo(string deviceId, byte[] publicKey);
         Task<byte[]> CreateAuthenticationDataAsync();
+        Task<bool> VerifyServerAsync(byte[] data);
         Task<bool> SaveCredentialsAsync();
         Task<bool> LoadCredentialsAsync();
         Task ClearCredentialsAsync();

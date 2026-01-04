@@ -344,6 +344,9 @@ public partial class MainPage : ContentPage
             var authData = await _authService.CreateAuthenticationDataAsync();
             var success = await _bleService.WriteAuthenticationDataAsync(authData);
 
+            await Task.Delay(10);
+
+
             if (success)
             {
                 await _authService.SaveCredentialsAsync();

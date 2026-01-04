@@ -14,6 +14,7 @@ namespace BLETest.GattClientNative.Platforms.Android
         private BluetoothGattCharacteristic? _writeCharacteristic;
         private BluetoothGattCharacteristic? _notifyCharacteristic;
         private BluetoothGattCharacteristic? _authWriteCharacteristic;
+        private BluetoothGattCharacteristic? _authReadCharacteristic;
         private readonly Context _context;
         private readonly Guid _serviceUuid;
         private readonly Guid _writeCharacteristicUuid;
@@ -141,6 +142,40 @@ namespace BLETest.GattClientNative.Platforms.Android
             }
         }
 
+        public async Task<byte[]> ReadAuthenticationDataAsync()
+        {
+            if (_bluetoothGatt == null || _authReadCharacteristic == null || !IsConnected)
+            {
+                return Array.Empty<byte>();
+            }
+            try
+            {
+                bool readResult = _bluetoothGatt.ReadCharacteristic(_authReadCharacteristic);
+                System.Diagnostics.Debug.WriteLine($"ReadAuthenticationDataAsync read result: {readResult}");
+                if (readResult)
+                {
+                    byte[]? data;
+                    if (global::Android.OS.Build.VERSION.SdkInt >= global::Android.OS.BuildVersionCodes.Tiramisu)
+                    {
+                        data = _authReadCharacteristic.GetValue();
+                    }
+                    else
+                    {
+                        #pragma warning disable CS0618
+                        data = _authReadCharacteristic.GetValue();
+#pragma warning restore CS0618
+                    }
+                    return data ?? Array.Empty<byte>();
+                }
+                return Array.Empty<byte>();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ReadAuthenticationDataAsync error: {ex.Message}");
+                return Array.Empty<byte>();
+            }
+        }
+
         private void OnConnectionStateChange(BluetoothGatt gatt, GattStatus status, ProfileState newState)
         {
             Console.WriteLine("Connection Status Changed   GattStatus: {0}   ProfileState:{1}", status, newState);
@@ -173,6 +208,8 @@ namespace BLETest.GattClientNative.Platforms.Android
 
                     // 認証用キャラクタリスティックを取得
                     _authWriteCharacteristic = service.GetCharacteristic(Java.Util.UUID.FromString(_authCharacteristicWriteUuid.ToString()));
+
+                    _authReadCharacteristic = service.GetCharacteristic(Java.Util.UUID.FromString(_authCharacteristicReadUuid.ToString()));
 
                     if (_writeCharacteristic != null && _notifyCharacteristic != null)
                     {
