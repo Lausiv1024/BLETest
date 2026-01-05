@@ -25,6 +25,7 @@ namespace BLETest.GattClientNative.Platforms.Android
 
         public event EventHandler<string>? MessageReceived;
         public event EventHandler<string>? ConnectionStateChanged;
+        public event EventHandler<byte[]>? AuthenticationDataReceived;
         public event EventHandler<bool>? AuthenticationCompleted;
         public bool IsConnected { get; private set; }
 
@@ -120,10 +121,10 @@ namespace BLETest.GattClientNative.Platforms.Android
                 }
                 else
                 {
-#pragma warning disable CS0618
+#pragma warning disable CA1422
                     _authWriteCharacteristic.SetValue(data);
                     result = _bluetoothGatt.WriteCharacteristic(_authWriteCharacteristic);
-#pragma warning restore CS0618
+#pragma warning restore CA1422
                     System.Diagnostics.Debug.WriteLine($"WriteAuthenticationDataAsync result (legacy): {result}");
                 }
 
@@ -142,37 +143,20 @@ namespace BLETest.GattClientNative.Platforms.Android
             }
         }
 
-        public async Task<byte[]> ReadAuthenticationDataAsync()
+        public async Task ReadAuthenticationDataAsync()
         {
             if (_bluetoothGatt == null || _authReadCharacteristic == null || !IsConnected)
             {
-                return Array.Empty<byte>();
             }
             try
             {
                 bool readResult = _bluetoothGatt.ReadCharacteristic(_authReadCharacteristic);
                 System.Diagnostics.Debug.WriteLine($"ReadAuthenticationDataAsync read result: {readResult}");
-                if (readResult)
-                {
-                    byte[]? data;
-                    if (global::Android.OS.Build.VERSION.SdkInt >= global::Android.OS.BuildVersionCodes.Tiramisu)
-                    {
-                        data = _authReadCharacteristic.GetValue();
-                    }
-                    else
-                    {
-                        #pragma warning disable CS0618
-                        data = _authReadCharacteristic.GetValue();
-#pragma warning restore CS0618
-                    }
-                    return data ?? Array.Empty<byte>();
-                }
-                return Array.Empty<byte>();
+                // 実際のデータはOnCharacteristicReadで受け取る
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"ReadAuthenticationDataAsync error: {ex.Message}");
-                return Array.Empty<byte>();
             }
         }
 
@@ -272,6 +256,21 @@ namespace BLETest.GattClientNative.Platforms.Android
             }
         }
 
+        private void OnCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value, GattStatus status)
+        {
+            // 認証用キャラクタリスティックの読み取り完了処理
+            if (status == GattStatus.Success)
+            {
+                // 読み取ったデータを他で使用するためにイベントで通知します。主にReadは認証処理に使用されます。
+                AuthenticationDataReceived?.Invoke(this, value);
+                System.Diagnostics.Debug.WriteLine($"Authentication Data Read");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to read authentication data. Status: {status}");
+            }
+        }
+
         /// <summary>
         /// BluetoothGattCallbackの実装
         /// </summary>
@@ -306,6 +305,11 @@ namespace BLETest.GattClientNative.Platforms.Android
                 {
                     _client.OnCharacteristicChanged(gatt, characteristic);
                 }
+            }
+
+            public override void OnCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value, [GeneratedEnum] GattStatus status)
+            {
+                _client.OnCharacteristicRead(gatt, characteristic, value, status);
             }
         }
     }

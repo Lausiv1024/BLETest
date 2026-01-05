@@ -1,4 +1,7 @@
+using BLETest.Common.ComModel;
 using BLETest.GattClientNative.Services;
+using MessagePack;
+using System.Threading.Tasks;
 
 namespace BLETest.GattClientNative;
 
@@ -20,11 +23,14 @@ public partial class MainPage : ContentPage
         _bleService.MessageReceived += OnMessageReceived;
         _bleService.ConnectionStateChanged += OnConnectionStateChanged;
         _bleService.AuthenticationCompleted += OnAuthenticationCompleted;
+        _bleService.AuthenticationDataReceived += _bleService_AuthenticationDataReceived;
 
         // 初期化
         InitializeBleAsync();
         UpdateAuthStatus();
     }
+
+
 
     private async void InitializeBleAsync()
     {
@@ -285,6 +291,18 @@ public partial class MainPage : ContentPage
         }
     }
 
+    private async void _bleService_AuthenticationDataReceived(object? sender, byte[] e)
+    {
+        var comData = MessagePackSerializer.Deserialize<CommunicationBase>(e);
+        if (comData == null)
+            return;
+        if (comData.Command == CommandType.DeviceNewResult)
+        {
+            var result = MessagePackSerializer.Deserialize<DeviceNewResult>(e);
+            await OnInitialSettingCompleted(result.IsSuccess);
+        }
+    }
+
     private async void OnScanQRButtonClicked(object? sender, EventArgs e)
     {
         try
@@ -344,40 +362,50 @@ public partial class MainPage : ContentPage
             var authData = await _authService.CreateAuthenticationDataAsync();
             var success = await _bleService.WriteAuthenticationDataAsync(authData);
 
-            await Task.Delay(10);
+            if (!success)
+            {
+                await DisplayAlertAsync("Error", "認証データの送信に失敗しました", "OK");
+                return;
+            }
 
+            await Task.Delay(100);
+            await _bleService.ReadAuthenticationDataAsync();
+        } catch (Exception ex)
+        {
+            await DisplayAlertAsync("Error", $"Authentication failed: {ex.Message}", "OK");
+        }
+    }
 
+    private async Task OnInitialSettingCompleted(bool success)
+    {
+        MainThread.BeginInvokeOnMainThread(async() =>
+        {
             if (success)
             {
                 await _authService.SaveCredentialsAsync();
                 ReceivedMessagesLabel.Text += $"{DateTime.Now:HH:mm:ss}: 認証データ送信成功\n";
                 UpdateAuthStatus();
-            }
-            else
+            } else
             {
-                await DisplayAlert("Error", "認証データの送信に失敗しました", "OK");
+                await DisplayAlertAsync("Error", "認証データの送信に失敗しました", "OK");
             }
-        }
-        catch (FileNotFoundException ex)
-        {
-            await DisplayAlert("Error", $"Authentication failed: {ex.Message}", "OK");
-        }
+        });
     }
 
     private void OnAuthenticationCompleted(object? sender, bool success)
     {
         MainThread.BeginInvokeOnMainThread(async () =>
         {
-            if (success)
-            {
-                ReceivedMessagesLabel.Text += $"{DateTime.Now:HH:mm:ss}: 認証完了\n";
-                await _authService.SaveCredentialsAsync();
-                UpdateAuthStatus();
-            }
-            else
-            {
-                ReceivedMessagesLabel.Text += $"{DateTime.Now:HH:mm:ss}: 認証失敗\n";
-            }
+            //if (success)
+            //{
+            //    ReceivedMessagesLabel.Text += $"{DateTime.Now:HH:mm:ss}: 認証完了\n";
+            //    await _authService.SaveCredentialsAsync();
+            //    UpdateAuthStatus();
+            //}
+            //else
+            //{
+            //    ReceivedMessagesLabel.Text += $"{DateTime.Now:HH:mm:ss}: 認証失敗\n";
+            //}
         });
     }
 }

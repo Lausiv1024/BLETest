@@ -36,8 +36,8 @@ public partial class MainWindow : Window
         _bleCommunicationServer.OnAuthenticationResult += (s, e) =>
         {
             Dispatcher.UIThread.Post(() => ReceivedVal.Text += $"[Auth] : {(e.IsSuccess ? "Success" : "Failure")} - {e.Message}\n");
-            if (e.IsSuccess)
-                Dispatcher.UIThread.Post(() => AddDevice.Hide(TaskDialogStandardResult.OK));
+            
+            Dispatcher.UIThread.Post(() => AddDevice.Hide(TaskDialogStandardResult.OK));
         };
         await _bleCommunicationServer.BLEInitializeAsync();
     }

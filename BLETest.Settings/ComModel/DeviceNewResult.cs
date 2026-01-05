@@ -8,7 +8,7 @@ namespace BLETest.Common.ComModel
     [MessagePackObject]
     public class DeviceNewResult: CommunicationBase
     {
-        [Key(2)]
+        [Key(7)]
         public bool IsSuccess { get; set; }
     }
 }

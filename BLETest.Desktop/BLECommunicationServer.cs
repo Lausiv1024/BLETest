@@ -1,16 +1,17 @@
+using BLETest.Common;
+using BLETest.Common.ComModel;
+using MessagePack;
+using Org.BouncyCastle.Asn1.Ocsp;
+using Org.BouncyCastle.Security;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
-using System.Diagnostics;
 using Windows.Storage.Streams;
-using BLETest.Common;
-using BLETest.Common.ComModel;
-using MessagePack;
-using Org.BouncyCastle.Security;
 namespace BLETest.Desktop;
 
 public class BLECommunicationServer
@@ -178,24 +179,34 @@ public class BLECommunicationServer
         var deferral = args.GetDeferral();
         var request = await args.GetRequestAsync();
         var b = request.Value.ToArray();
+        var cmd = Util.GetCommandType(b);
+        if (cmd == CommandType.DeviceNewData)
+        {
+            HandleDeviceNewData(b, request);
+        }
 
+        deferral.Complete();
+    }
+
+    private void HandleDeviceNewData(byte[]b, GattWriteRequest req)
+    {
+        // Implementation for handling DeviceNewData
         var deviceNew = MessagePackSerializer.Deserialize<DeviceNewData>(b);
         // Signature検証
         var signer = SignerUtilities.GetSigner(Constants.ECDH_CURVE_ALGORITHM);
-        signer.Init(false,CryptoUtil.ByteToPubKey( deviceNew.MPubKey)); //signerを検証モードとして初期化します
+        signer.Init(false, CryptoUtil.ByteToPubKey(deviceNew.MPubKey)); //signerを検証モードとして初期化します
         var deviceIdBytes = deviceNew.DeviceId.ToByteArray();
-        signer.BlockUpdate(deviceIdBytes, 0,  deviceIdBytes.Length);
+        signer.BlockUpdate(deviceIdBytes, 0, deviceIdBytes.Length);
         var isValid = signer.VerifySignature(deviceNew.DeviceIdSig);
-        if (request.Option == GattWriteOption.WriteWithResponse)
+        if (req.Option == GattWriteOption.WriteWithResponse)
         {
-            request.Respond();
+            req.Respond();
         }
         if (!isValid)
         {
             Console.WriteLine("Invalid device authentication signature");
             //PostDebugMessage("Invalid device authentication signature");
-            SendAuthenticationResult(false, "Invalid device authentication signature", request);
-            deferral.Complete();
+            SendInitAuthenticationResult(false, "Invalid device authentication signature", req);
             return;
         }
 
@@ -203,19 +214,23 @@ public class BLECommunicationServer
 
         Console.WriteLine("Device authenticated: " + deviceNew.DeviceId);
         //PostDebugMessage("Device authenticated: " + deviceNew.DeviceId);
-        SendAuthenticationResult(true, "Device authenticated", request);
-
-        deferral.Complete();
+        SendInitAuthenticationResult(true, "Device authenticated", req);
     }
 
-    private void SendAuthenticationResult(bool isSuccess, string message, GattWriteRequest req)
+    /// <summary>
+    /// 初回認証結果をクライアントに送信します
+    /// </summary>
+    /// <param name="isSuccess"></param>
+    /// <param name="message"></param>
+    /// <param name="req"></param>
+    private void SendInitAuthenticationResult(bool isSuccess, string message, GattWriteRequest req)
     {
         OnAuthenticationResult?.Invoke(this, new AuthenticationResultEventArgs(isSuccess, message));
 
         AuthNextRead = new DeviceNewResult
         {
             IsSuccess = isSuccess,
-            Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),Id=1
+            Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),Id=1, Command = CommandType.DeviceNewResult,
         };
     }
 
@@ -227,13 +242,13 @@ public class BLECommunicationServer
         // Respond with the next AuthNextRead data if available
         if (AuthNextRead != null)
         {
-            var bytes = MessagePackSerializer.Serialize(AuthNextRead);
+            var bytes = MessagePackSerializer.Serialize((DeviceNewResult)AuthNextRead);
             request.RespondWithValue(bytes.AsBuffer());
             AuthNextRead = null;
         }
         else
         {
-            byte[] buf = new byte[] { 0x30 };
+            byte[] buf = "0"u8.ToArray();
             request.RespondWithValue(buf.AsBuffer());
         }
         deferral.Complete();

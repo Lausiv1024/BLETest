@@ -54,7 +54,7 @@ namespace BLETest.GattClientNative.Services
             {
                 DeviceId = deviceIdGuid,
                 MPubKey = clientPublicKey,
-                DeviceIdSig = signature, Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(), Id = 0
+                DeviceIdSig = signature, Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(), Id = 0, Command = CommandType.DeviceNewData
             };
 
             // MessagePackでシリアライズ

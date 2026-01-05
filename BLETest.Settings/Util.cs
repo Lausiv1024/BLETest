@@ -1,3 +1,5 @@
+using BLETest.Common.ComModel;
+using MessagePack;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -18,6 +20,16 @@ namespace BLETest.Common
         public static string ExecutingDirectory()
         {
             return AppDomain.CurrentDomain.BaseDirectory;
+        }
+
+        public static CommandType GetCommandType(byte[] data)
+        {
+            if (data.Length < 1)
+            {
+                throw new ArgumentException("Data is too short to determine command type.");
+            }
+            var com = MessagePackSerializer.Deserialize<CommunicationBase>(data);
+            return com.Command;
         }
     }
 }

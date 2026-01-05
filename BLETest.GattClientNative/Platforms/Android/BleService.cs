@@ -19,6 +19,7 @@ public class BleService(Guid serviceUuid, Guid writeCharacteristicUuid, Guid not
     public event EventHandler<string>? MessageReceived;
     public event EventHandler<string>? ConnectionStateChanged;
     public event EventHandler<bool>? AuthenticationCompleted;
+    public event EventHandler<byte[]>? AuthenticationDataReceived;
     public bool IsConnected => _gattClient?.IsConnected ?? false;
 
     public Task InitializeAsync()
@@ -114,6 +115,7 @@ public class BleService(Guid serviceUuid, Guid writeCharacteristicUuid, Guid not
         _gattClient.MessageReceived += (s, e) => MessageReceived?.Invoke(this, e);
         _gattClient.ConnectionStateChanged += (s, e) => ConnectionStateChanged?.Invoke(this, e);
         _gattClient.AuthenticationCompleted += (s, e) => AuthenticationCompleted?.Invoke(this, e);
+        _gattClient.AuthenticationDataReceived += (s, e ) => AuthenticationDataReceived?.Invoke(this, e);
 
         _gattClient.Connect(device);
         return Task.FromResult(true);
@@ -154,13 +156,13 @@ public class BleService(Guid serviceUuid, Guid writeCharacteristicUuid, Guid not
         return await _gattClient.WriteAuthenticationDataAsync(data);
     }
 
-    public Task<byte[]> ReadAuthenticationDataAsync()
+    public async Task ReadAuthenticationDataAsync()
     {
         if (_gattClient == null)
         {
             throw new InvalidOperationException("Not connected to any device.");
         }
 
-        return _gattClient.ReadAuthenticationDataAsync();
+        await _gattClient.ReadAuthenticationDataAsync();
     }
 }

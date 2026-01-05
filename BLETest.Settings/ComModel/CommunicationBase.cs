@@ -11,5 +11,15 @@ namespace BLETest.Common.ComModel
         public int Id { get; set; }
         [Key(1)]
         public long Timestamp { get; set; }
+        [Key(2)]
+        public CommandType Command { get; set; }
+    }
+
+    public enum CommandType
+    {
+        None = 0,
+        DeviceNewData = 1,
+        DeviceNewResult = 2,
+        ServerVerifyData = 3,
     }
 }
