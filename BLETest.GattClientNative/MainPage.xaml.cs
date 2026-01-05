@@ -1,3 +1,4 @@
+using BLETest.Common;
 using BLETest.Common.ComModel;
 using BLETest.GattClientNative.Services;
 using MessagePack;
@@ -291,18 +292,6 @@ public partial class MainPage : ContentPage
         }
     }
 
-    private async void _bleService_AuthenticationDataReceived(object? sender, byte[] e)
-    {
-        var comData = MessagePackSerializer.Deserialize<CommunicationBase>(e);
-        if (comData == null)
-            return;
-        if (comData.Command == CommandType.DeviceNewResult)
-        {
-            var result = MessagePackSerializer.Deserialize<DeviceNewResult>(e);
-            await OnInitialSettingCompleted(result.IsSuccess);
-        }
-    }
-
     private async void OnScanQRButtonClicked(object? sender, EventArgs e)
     {
         try
@@ -368,13 +357,47 @@ public partial class MainPage : ContentPage
                 return;
             }
 
-            await Task.Delay(100);
+            await Task.Delay(300);
             await _bleService.ReadAuthenticationDataAsync();
         } catch (Exception ex)
         {
             await DisplayAlertAsync("Error", $"Authentication failed: {ex.Message}", "OK");
         }
     }
+
+
+    int resendCount = 0;
+    const int maxResendCount = 3;
+    private async void _bleService_AuthenticationDataReceived(object? sender, byte[] e)
+    {
+        if (e.Length == 0) return;
+        if (e.Length == 1 && e[0] == 0x30)
+        {
+            if (resendCount < maxResendCount)
+            {
+                resendCount++;
+                // 認証データ再送
+                await Task.Delay(300); // 少し待機してから再送
+                ReceivedMessagesLabel.Text += $"{DateTime.Now:HH:mm:ss}: 認証データ再送信 ({resendCount}/{maxResendCount})\n";
+                await _bleService.ReadAuthenticationDataAsync();
+            } else
+            {
+                // 最大再送回数に達した場合、失敗とみなす
+                ReceivedMessagesLabel.Text += $"{DateTime.Now:HH:mm:ss}: 認証データ送信失敗 (最大再送回数に達しました)\n";
+                resendCount = 0;
+                await OnInitialSettingCompleted(false);
+            }
+            // 認証失敗
+            return;
+        }
+        if (Util.CanUnpack(e, CommandType.DeviceNewResult))
+        {
+            var result = Util.UnpackComData<DeviceNewResult>(e);
+            resendCount = 0;
+            await OnInitialSettingCompleted(result.IsSuccess);
+        }
+    }
+
 
     private async Task OnInitialSettingCompleted(bool success)
     {
@@ -394,18 +417,18 @@ public partial class MainPage : ContentPage
 
     private void OnAuthenticationCompleted(object? sender, bool success)
     {
-        MainThread.BeginInvokeOnMainThread(async () =>
-        {
-            //if (success)
-            //{
-            //    ReceivedMessagesLabel.Text += $"{DateTime.Now:HH:mm:ss}: 認証完了\n";
-            //    await _authService.SaveCredentialsAsync();
-            //    UpdateAuthStatus();
-            //}
-            //else
-            //{
-            //    ReceivedMessagesLabel.Text += $"{DateTime.Now:HH:mm:ss}: 認証失敗\n";
-            //}
-        });
+        //MainThread.BeginInvokeOnMainThread(async () =>
+        //{
+        //    //if (success)
+        //    //{
+        //    //    ReceivedMessagesLabel.Text += $"{DateTime.Now:HH:mm:ss}: 認証完了\n";
+        //    //    await _authService.SaveCredentialsAsync();
+        //    //    UpdateAuthStatus();
+        //    //}
+        //    //else
+        //    //{
+        //    //    ReceivedMessagesLabel.Text += $"{DateTime.Now:HH:mm:ss}: 認証失敗\n";
+        //    //}
+        //});
     }
 }

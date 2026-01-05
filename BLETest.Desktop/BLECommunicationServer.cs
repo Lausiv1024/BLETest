@@ -242,7 +242,11 @@ public class BLECommunicationServer
         // Respond with the next AuthNextRead data if available
         if (AuthNextRead != null)
         {
-            var bytes = MessagePackSerializer.Serialize((DeviceNewResult)AuthNextRead);
+            byte[] bytes;
+            if (AuthNextRead.Command == CommandType.DeviceNewResult)
+                bytes = Util.PackComData((DeviceNewResult)AuthNextRead);
+            else 
+                bytes = Util.PackComData(AuthNextRead);
             request.RespondWithValue(bytes.AsBuffer());
             AuthNextRead = null;
         }

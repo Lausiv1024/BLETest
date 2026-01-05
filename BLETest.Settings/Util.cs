@@ -31,5 +31,21 @@ namespace BLETest.Common
             var com = MessagePackSerializer.Deserialize<CommunicationBase>(data);
             return com.Command;
         }
+
+        public static bool CanUnpack(byte[] data, CommandType command)
+        {
+            var com = MessagePackSerializer.Deserialize<CommunicationBase>(data);
+            return com.Command == command;
+        }
+
+        public static byte[] PackComData<T>(T com)where T : CommunicationBase
+        {
+            return MessagePackSerializer.Serialize<T>(com);
+        }
+
+        public static T UnpackComData<T>(byte[] data) where T : CommunicationBase
+        {
+            return MessagePackSerializer.Deserialize<T>(data);
+        }
     }
 }
